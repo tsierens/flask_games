@@ -122,7 +122,7 @@ def go():
         while not game_over(board):
             print "HELLO"
             if player == -1:
-                _,move = alpha_beta_move(board,player,depth=2)#, evaluation = net_value)
+                _,move = alpha_beta_move(board,player,depth=4)#, evaluation = net_value)
                 print move
                 print game_over(board)
                 board = board.reshape((6,7))
