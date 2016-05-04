@@ -29,6 +29,14 @@ app.board = [0]*42
 app.player = 1
 
 
+
+def net_value(board):
+    (m1,m2,m3,m4) = np.load('TD_cccc_100_1_6million(1).npz')['arr_0']
+    board = np.copy(board).reshape((1,42))
+    m5 = np.dot(board, m1) + m2
+    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4)
+
+
 def game_over(board):
     board = np.array(board).reshape((6,7))
     return cccc.winner(board) or cccc.is_full(board)
@@ -114,8 +122,9 @@ def go():
         while not game_over(board):
             print "HELLO"
             if player == -1:
-                _,move = alpha_beta_move(board,player,depth=6)
+                _,move = alpha_beta_move(board,player,depth=2)#, evaluation = net_value)
                 print move
+                print game_over(board)
                 board = board.reshape((6,7))
                 board[np.where(board[:,move-1]==0)[0][-1],move-1] = active_turn = player
                 player = -1*player

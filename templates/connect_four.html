@@ -201,7 +201,7 @@ function mouseDown(evt) {
     var px = evt.clientX - el.offsetLeft;
     var py = evt.clientY - el.offsetTop;
     
-    if (px % (tile_size+padding) >= padding && py >=padding && py <= canvas.width-2*padding && ! over()) {
+    if (px % (tile_size+padding) >= padding && py >=padding && py <= canvas.width-2*padding && cplayer == 1 && ! over()) {
         var idx = Math.floor(px / (padding+tile_size)) +42;
         for (var i = 0; i<8; i++){
             idx -= 7
