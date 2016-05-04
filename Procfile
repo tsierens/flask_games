@@ -1,1 +1,1 @@
-web: gunicorn app : flask_connect_four
+web: python flask_connect_four.py
