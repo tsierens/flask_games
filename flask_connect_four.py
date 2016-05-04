@@ -6,8 +6,8 @@ import time
 import sys
 import connect_four as cccc
 import os
-import theano
-import theano.tensor as T
+#import theano
+#import theano.tensor as T
 import lasagne
 from flask import Flask, render_template, request, redirect
 #import json
