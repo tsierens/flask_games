@@ -1,1 +1,1 @@
-web: python flask_connect_four.py runserver 0.0.0.0:5000
+web: gunicorn app : flask_connect_four
