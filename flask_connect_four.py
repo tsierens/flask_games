@@ -18,7 +18,7 @@ from flask import Flask, render_template, request, redirect
 #         return flask_player_move(board,active_turn,self.depth)[1]
     
 app = Flask(__name__)
-app.debug = True
+#app.debug = True
 app.GAME = [r"Tic_Tac_Toe", r"Connect_Four"]
 app.OPTIONS = [r"Human", r"MiniMax",r"Neural_network"]
 app.board = [0]*42
@@ -110,7 +110,7 @@ def go():
         while not game_over(board):
             print "HELLO"
             if player == -1:
-                _,move = alpha_beta_move(board,player,depth=8)
+                _,move = alpha_beta_move(board,player,depth=6)
                 print move
                 board = board.reshape((6,7))
                 board[np.where(board[:,move-1]==0)[0][-1],move-1] = active_turn = player
