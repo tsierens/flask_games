@@ -34,7 +34,7 @@ def net_value(board):
     (m1,m2,m3,m4) = np.load('TD_cccc_100_1_6million(1).npz')['arr_0']
     board = np.copy(board).reshape((1,42))
     m5 = np.dot(board, m1) + m2
-    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4)
+    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4) + random.random()*0.2 - 0.1
 
 
 def game_over(board):
@@ -124,7 +124,7 @@ def go():
                 return render_template('connect_four.html', board = list(board), cplayer = player, finished = -1)
         while not game_over(board):
             if player == -1:
-                _,move = alpha_beta_move(board,player,depth=4, evaluation = net_value)
+                _,move = alpha_beta_move(board,player,depth=2, evaluation = net_value)
                 #print move
                 #print game_over(board)
                 board = board.reshape((6,7))
