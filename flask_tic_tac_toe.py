@@ -7,26 +7,14 @@ import tic_tac_toe as ttt
 from flask import Flask, render_template, request, redirect
 import json
 
-# def flask_player_move(board, active_turn):
-
-# class flask_player:
-# #    def __init__(self):
-        
-#     def make_move(self,board,active_turn):
-#         #print (board,active_turn,self.depth)
-#         return flask_player_move(board,active_turn,self.depth)[1]
-    
-app = Flask(__name__)
-app.debug = True
-app.GAME = [r"Tic_Tac_Toe", r"Connect_Four"]
-app.OPTIONS = [r"Human", r"MiniMax",r"Neural_network"]
-app.board = [0,0,0,0,0,0,0,0,0]
-app.player = 1
-
-
 def game_over(board):
     return ttt.is_full(board) or ttt.winner(board)
-
+class alpha_beta:
+    def __init__(self,depth):
+        self.depth = depth
+    def make_move(self,board,active_turn):
+        #print (board,active_turn,self.depth)
+        return alpha_beta_move(board,active_turn,self.depth)[1]
 def alpha_beta_move(board,active_turn,depth,alpha = 2):
     swap_dict = {1:-1,-1:1}
     dummy_board = np.copy(np.array(board))
@@ -58,65 +46,27 @@ def alpha_beta_move(board,active_turn,depth,alpha = 2):
 
     return (best_value, candidate_move)
 
-@app.route('/')
-def main():
-    app.board = [0,0,0,0,0,0,0,0,0]
-    app.player = 1
-    return redirect('/index')
+def play(p1='human',p2='remote',depth=0,heir=None):
+    board = np.zeros(9)
+    player = 1
+    player_type = {1:'human',-1:'human'}
+    print 'playing tic tac toe'
+    if p1 == "human":
+        player1 = ttt.player()
+        player_type[1] = 'human'
+    else:
+        player1 = alpha_beta(depth)
+        player_type[1] = 'remote'
+    if p2 == "human":
+        player2 = ttt.player()
+        player_type[-1] =  'human'
+    else:
+        player2 = alpha_beta(depth)
+        player_type[-1] = 'remote'
+    print 'starting a game of tic tac toe'
+    print [player_type[1], player_type[-1]]
+    return render_template('tic_tac_toe.html',board = list(board),
+                                   player =player, types = [player_type[1],player_type[-1]], depth = depth,finished = -2)
     
-
-@app.route('/clear', methods = ['GET'])
-def clear():
-    return redirect('/index')
-    #return render_template('index.html',op = app.OPTIONS, names = app.NAMES)
-
-        
-@app.route('/index', methods = ['GET','POST'])
-
-def go():
-    if request.method == 'GET':
-        board = app.board
-        player = app.player
-        print "HOWDY"
-        return render_template('tic_tac_toe.html', board = board, cplayer = player, finished = -2 )
-    if request.method == 'POST':
-        player = int(request.form.get("player"))
-        board = request.form.get("board")
-        board = board.split(",")
-        board = [int(x) for x in board]
-        board = np.array(board)
-        print board,player
-        if game_over(np.copy(board)):
-            if ttt.winner(board)==1:
-                return render_template('tic_tac_toe.html', board = list(board), cplayer = player, finished = 1)
-            if ttt.winner(board) ==0:
-                return render_template('tic_tac_toe.html', board = list(board), cplayer = player, finished = 0)
-            if ttt.winner(board) == -1:
-                return render_template('tic_tac_toe.html', board = list(board), cplayer = player, finished = -1)
-        while not game_over(board):
-            print "HELLO"
-            if player == -1:
-                _,move = alpha_beta_move(board,player,depth=6)
-                print move
-                board[move-1] = player
-                player = -1*player
-                print board,player
-
-            elif player == 1:
-                print board, player
-                print 'pleaaaaaaaaase render!!!'
-                return render_template('tic_tac_toe.html', board = list(board), cplayer = player,finished=-2)
-                print 'you shouldnt see this'
-        if game_over(np.copy(board)):
-            if ttt.winner(board)==1:
-                return render_template('tic_tac_toe.html', board = list(board), cplayer = player, finished = 1)
-            if ttt.winner(board) ==0:
-                return render_template('tic_tac_toe.html', board = list(board), cplayer = player, finished = 0)
-            if ttt.winner(board) == -1:
-                return render_template('tic_tac_toe.html', board = list(board), cplayer = player, finished = -1)
-       
     
-  
     
-if __name__ == '__main__':
-    app.run(port=5000)

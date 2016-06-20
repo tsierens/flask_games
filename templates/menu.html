@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <style> 
+            label.text{
+                font-size: 24px;}
+        </style>
+        <meta charset="utf-8">
+        <title>Deep Learning</title>
+    </head>
+    <body>
+        <h1> Play against a Deep Neural Network!</h1>
+        <form method = "POST" action = "/index">
+            
+            <p> <label class = "text"><b>Choose a game</b></label><br>
+                <input type = "radio" name = "game" value = 'ttt' checked><label class = "text">Tic Tac Toe</label><br>
+                <input type = "radio" name = "game" value = 'c4'><label class = "text">Connect Four</label>
+            </p>
+            <p> <label class = "text"><b>Player 1</b></label><br>
+                <input type = "radio" name = "p1" value = 'human' checked><label class = "text">Human<br>
+                <input type = "radio" name = "p1" value = 'ai'><label class = "text">Computer</label>
+            </p>
+            <p> <label class = "text"><b>Player 2</b></label><br>
+                <input type = "radio" name = "p2" value = 'human'><label class = "text">Human<br>
+                <input type = "radio" name = "p2" value = 'ai' checked><label class = "text">Computer</label>
+            </p>
+            <p> <label class = "text"><b>Choose a tree-search depth</b></label><br>
+                <input type = "radio" name = "depth" value = 0><label class = "text">0-ply </label><br>
+                <input type = "radio" name = "depth" value = 2><label class = "text">2-ply </label><br>
+                <input type = "radio" name = "depth" value = 4 checked><label class = "text">4-ply </label><br>
+                <input type = "radio" name = "depth" value = 6><label class = "text">6-ply </label><br>
+            </p>
+            <p> <label class = "text"><b>Choose an AI evaluation Method</b></label><br>
+                <input type = "radio" name = "eval" value = "random"><label class = "text">Random</label><br>
+                <input type = "radio" name = "eval" value = "nn" checked><label class = "text">Neural Network</label>
+            </p>
+            <p> <input type="submit" value="Submit">
+            </p>
+        </form>
+    </body>
+</html>
+                
+            

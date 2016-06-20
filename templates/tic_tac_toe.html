@@ -31,13 +31,25 @@
 
 var canvas, ctx;
 var data;
-var cplayer = {{cplayer|safe}};
+var cplayer = {{player|safe}};
+var input_player = cplayer;
+var depth = {{depth|safe}};
 var board = {{board|safe}};
 var finished= {{finished|safe}};
-var message = ""
-var message_sent = false
-//var cplayer = -1
-//var board = [1,0,0,0,0,-1,1,-1,0]
+var types = {{types | safe}};
+var message = "";
+var message_sent = false;
+var move_type=false;
+if (cplayer == 1){
+    move_type = types[0];
+}
+else{
+    move_type = types[1];
+}
+
+    
+//var cplayer = -1;
+//var board = [1,0,0,0,0,-1,1,-1,0];
 window.onload = function main() {
     
     canvas = document.createElement("canvas");
@@ -46,7 +58,12 @@ window.onload = function main() {
     
     document.body.appendChild(canvas);
     
+    if (move_type == "human" || over()){
     canvas.addEventListener("mousedown", mouseDown);
+    }
+    else {
+        sendData();
+    }
     
     
     init();
@@ -124,6 +141,40 @@ function render() {
     }
         
 }
+
+    
+function sendData() {
+            var name,
+            form = document.createElement("form"),
+            node = document.createElement("input");
+
+
+            form.action = 'ttt';
+            form.target = '_self';
+            form.method = 'POST';
+
+            node.name = "player";
+            node.value = cplayer.toString();
+            form.appendChild(node.cloneNode());   
+    
+            node.name = "board";
+            node.value = board.toString();
+            form.appendChild(node.cloneNode());
+    
+            node.name = "depth";
+            node.value = depth.toString();
+            form.appendChild(node.cloneNode());
+    
+            node.name = "types";
+            node.value = types.toString();
+            form.appendChild(node.cloneNode());
+
+            form.style.display = "none";
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+}
+    
     
 function Tile(x,y) {
     
@@ -191,11 +242,10 @@ function Tile(x,y) {
     
 function mouseDown(evt) {
     var el = evt.target;
-    
     var px = evt.clientX - el.offsetLeft;
     var py = evt.clientY - el.offsetTop;
     
-    if (px % 120 >=20 && py % 120 >=20 && ! over()) {
+    if (px % 120 >=20 && py % 120 >=20 && ! over()&& cplayer == input_player) {
         var idx = Math.floor(px/120);
         idx += Math.floor(py/120)*3;
     
@@ -215,35 +265,10 @@ function mouseDown(evt) {
             document.body.appendChild(iframe);
         });
 
-        function sendData(move) {
-            var name,
-            form = document.createElement("form"),
-            node = document.createElement("input");
-
-
-            form.action = 'index';
-            form.target = 'POST';
-            form.method = 'POST';
-
-            node.name = "player";
-            node.value = cplayer.toString();
-            form.appendChild(node.cloneNode());
-
-            node.name = "board";
-            node.value = board.toString();
-            form.appendChild(node.cloneNode());
-
-            form.style.display = "none";
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-            
-        }
-        sendData(idx);
+        
+        
+        sendData();
     }
-
-    
-    return
 }
 
     

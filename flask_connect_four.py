@@ -1,156 +1,130 @@
 
 import numpy as np
 #import pandas as pd
-import random
+from numpy import random
 import time
 import sys
 import connect_four as cccc
 import os
-#import theano
-#import theano.tensor as T
-#import lasagne
 from flask import Flask, render_template, request, redirect
-#import json
 
-# def flask_player_move(board, active_turn):
-
-# class flask_player:
-# #    def __init__(self):
-        
-#     def make_move(self,board,active_turn):
-#         #print (board,active_turn,self.depth)
-#         return flask_player_move(board,active_turn,self.depth)[1]
-    
 app = Flask(__name__)
 #app.debug = True
-app.GAME = [r"Tic_Tac_Toe", r"Connect_Four"]
-app.OPTIONS = [r"Human", r"MiniMax",r"Neural_network"]
 app.board = [0]*42
 app.player = 1
 
-
-
 def net_value(board):
+    t0=time.clock()
     (m1,m2,m3,m4) = np.load('TD_cccc_100_1_6million(1).npz')['arr_0']
     board = np.copy(board).reshape((1,42))
     m5 = np.dot(board, m1) + m2
-    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4) + random.random()*0.2 - 0.1
-
+    answer = np.tanh(np.dot(np.tanh(m5), m3) + m4) + random.random()*0.1 - 0.05
+    print "node evaluation took {:.5}s".format(time.clock()-t0)
+    return answer
+#    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4) + random.random()*0.1 - 0.05
 
 def game_over(board):
     board = np.array(board).reshape((6,7))
     return cccc.winner(board) or cccc.is_full(board)
 
-def alpha_beta_move(board,active_turn,depth,evaluation = lambda x: 0,alpha = 2):
-    swap_dict = {1:-1,-1:1}
-    dummy_board = np.copy(board)
-    dummy_board = dummy_board.reshape((6,7))
-    options = cccc.available_moves(dummy_board)
-    random.shuffle(options)
-    if len(options) == 1:
-        dummy_board[np.where(dummy_board[:,options[0]]==0)[0][-1],options[0]] = active_turn
-        if cccc.winner(dummy_board):
-            return (1,options[0]+1)
-        else:
-            return (0,options[0]+1)
-    if depth ==0:
-        best_value = -2
+inf = float("inf")
+
+def update_move(board, move, turn):
+    board[np.where(board[:,move]==0)[0][-1], move] = turn
+    return None
+    
+def unupdate_move(board, move):
+    if 0 in board[:,move]:
+        board[np.where(board[:,move]==0)[0][-1]+1, move] = 0
+    else:
+        board[0,move]=0
+    return None
+
+def alpha_beta_move(board, turn, depth = 0, alpha = -inf, beta = inf, evaluation = lambda x: 0):
+    dummy_board = np.copy(board) # we don't want to change the board state
+
+    swap_player = {1:-1,-1:1} # So we can change whose turn
+    options = cccc.available_moves(board) # get legal moves
+    random.shuffle(options) # should inherit move order instead of randomizing
+
+
+#     if len(options) == 1:
+#         update_move(board,options[0])
+#         if cccc.winner(dummy_board):
+#             return (inf,options[0])
+#         else:
+#             return (0,options[0])   
+    
+    best_value = -inf
+    
+    if not options:
+        print board, cccc.game_over(board)
+        print 'oops, no available moves'
+    cand_move = options[0]
+    if depth == 0: 
         for x in options:
-            height = np.where(dummy_board[:,x]==0)[0][-1]
-            dummy_board[height,x] = active_turn
-            eval_board = evaluation(dummy_board*active_turn)
-            if  eval_board > best_value:
-                best_value = eval_board
-                candidate_move = x + 1
-            dummy_board[height,x] = 0
-        return (best_value, candidate_move)
+            update_move(dummy_board,x,turn)
+            op_value = evaluation(dummy_board*swap_player[turn])
 
-    best_value = -2
-    candidate_move = None
-    for x in options:
-        height = np.where(dummy_board[:,x]==0)[0][-1]
-        dummy_board[height,x] = active_turn
-        if cccc.winner(dummy_board):
-            return (1, x+1)
-        (opp_value,opp_move) = alpha_beta_move(dummy_board,swap_dict[active_turn],depth-1,evaluation,-best_value)
-        if -opp_value > best_value:
-            candidate_move = x+1
-            best_value = -opp_value
-        if -opp_value >= alpha:
-            #print (options, x, best_value, alpha)
-            break
-        dummy_board[height,x] = 0
-
-    return (best_value, candidate_move)
-
-
-
-@app.route('/')
-def main():
-    return redirect('/index')
+            if -op_value > best_value:
+                cand_move = x
+                best_value = -op_value
+                alpha = max(alpha, best_value)
+    #        print depth,-op_value, best_value, cand_move,alpha,beta
+            if alpha >= beta:
+    #                print 'pruned'
+                break   #alpha-beta cutoff
+            unupdate_move(dummy_board,x)
+    else:
     
+        for x in options:
 
-@app.route('/clear', methods = ['GET'])
-def clear():
-    return redirect('/index')
-    #return render_template('index.html',op = app.OPTIONS, names = app.NAMES)
-
+    #        dummy_board = np.copy(board)
+    #        height= np.where(board[:,x]==0)[0][-1] #connect four only
+    #        dummy_board[height, x] = turn
+            update_move(dummy_board,x,turn)
         
-@app.route('/index', methods = ['GET','POST'])
+            if cccc.winner(dummy_board): #should check over and tied too
+                return(inf, x)
+            
+            if cccc.is_full(dummy_board): #This assumes you can't lose on your turn
+                return(0 , x)
+            
+            op_value,_ = alpha_beta_move( dummy_board,
+                                            swap_player[turn],
+                                            depth-1,
+                                            alpha = - beta,
+                                            beta = - alpha,
+                                            evaluation = evaluation)
 
-def go():
-    if request.method == 'GET':
-        board = app.board
-        player = app.player
-        print "HOWDY"
-        return render_template('connect_four.html', board = board, cplayer = player, finished = -2 )
-    if request.method == 'POST':
-        player = int(request.form.get("player"))
-        board = request.form.get("board")
-        board = board.split(",")
-        #print board
-        board = [int(x) for x in board]
-        board = np.array(board)
-        #print board,player
-        if game_over(np.copy(board)):
-            if cccc.winner(board.reshape((6,7)))==1:
-                print '1'
-                return render_template('connect_four.html', board = list(board), cplayer = player, finished = 1)
-            if cccc.winner(board.reshape((6,7))) ==0:
-                print '0'
-                return render_template('connect_four.html', board = list(board), cplayer = player, finished = 0)
-            if cccc.winner(board.reshape((6,7))) == -1:
-                print '-1'
-                return render_template('connect_four.html', board = list(board), cplayer = player, finished = -1)
-        while not game_over(board):
-            if player == -1:
-                _,move = alpha_beta_move(board,player,depth=2, evaluation = net_value)
-                #print move
-                #print game_over(board)
-                board = board.reshape((6,7))
-                board[np.where(board[:,move-1]==0)[0][-1],move-1] = active_turn = player
-                player = -1*player
-                board = board.reshape(42)
-                #print board,player
+            if -op_value > best_value:
+                cand_move = x
+                best_value = -op_value
+                alpha = max(alpha, best_value)
+    #        print depth,-op_value, best_value, cand_move,alpha,beta
+            if alpha >= beta:
+    #                print 'pruned'
+                break   #alpha-beta cutoff
+            unupdate_move(dummy_board,x)
+    #        dummy_board[height, x] = 0
+    return (best_value, cand_move)
 
-            elif player == 1:
-                #print board, player
-                return render_template('connect_four.html', board = list(board), cplayer = player,finished=-2)
-        if game_over(np.copy(board)):
-            if cccc.winner(board.reshape((6,7)))==1:
-                print '1'
-                return render_template('connect_four.html', board = list(board), cplayer = player, finished = 1)
-            if cccc.winner(board.reshape((6,7))) ==0:
-                print '0'
-                return render_template('connect_four.html', board = list(board), cplayer = player, finished = 0)
-            if cccc.winner(board.reshape((6,7))) == -1:
-                print '-1'
-                return render_template('connect_four.html', board = list(board), cplayer = player, finished = -1)
-       
+def play(p1='human',p2='remote',depth=0,heir="random"):
+    heir  = str(heir)
+    board = np.zeros(42)
+    player = 1
+    player_type = {1:'human',-1:'human'}
+    print 'playing tic tac toe'
+    if p1 == "human":
+        player_type[1] = 'human'
+    else:
+        player_type[1] = 'remote'
+    if p2 == "human":
+        player_type[-1] =  'human'
+    else:
+        player_type[-1] = 'remote'
+    print 'starting a game of connect Four'
+    print [player_type[1], player_type[-1]], heir, type(heir)
+    return render_template('connect_four.html',board = list(board),heir = [heir],
+                                   player =player, types = [player_type[1],player_type[-1]], depth = depth,finished = -2)
     
-  
-    
-if __name__ == '__main__':
-    # Bind to PORT if defined, otherwise default to 5000.
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)

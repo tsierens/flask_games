@@ -37,6 +37,8 @@ def is_winner(board):
     return winner(board) != 0
 def is_full(board):
     return np.prod(board) != 0
+def game_over(board):
+    return is_winner(board) or is_full(board)
     
     
 def print_board(board):
