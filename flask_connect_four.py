@@ -19,7 +19,7 @@ def net_value(board):
     board = np.copy(board).reshape((1,42))
     m5 = np.dot(board, m1) + m2
     answer = np.tanh(np.dot(np.tanh(m5), m3) + m4) + random.random()*0.1 - 0.05
-    print "node evaluation took {:.5}s".format(time.clock()-t0)
+#    print "node evaluation took {:.5}s".format(time.clock()-t0)
     return answer
 #    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4) + random.random()*0.1 - 0.05
 
