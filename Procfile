@@ -1,1 +1,1 @@
-web: python flask_connect_four.py $PORT
+web: python app.py $PORT
