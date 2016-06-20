@@ -6,20 +6,16 @@ import sys
 import tic_tac_toe as ttt
 import connect_four as cccc
 import os
-#import theano
-#import theano.tensor as T
-#import lasagne
 from flask import Flask, render_template, request, redirect
-#import json
 import flask_connect_four as fc4
 import flask_tic_tac_toe as ft3
 app = Flask(__name__)
 #app.debug = True
-app.GAMES = [r"Tic_Tac_Toe", r"Connect_Four"]
-app.OPTIONS = [r"Human", r"Computer"]
-app.EVALUATION = ["Random", "Neural Network"]
-app.DEPTH = 0
-app.PLAYERS = ['1','2']
+#app.GAMES = [r"Tic_Tac_Toe", r"Connect_Four"]
+#app.OPTIONS = [r"Human", r"Computer"]
+#app.EVALUATION = ["Random", "Neural Network"]
+#app.DEPTH = 0
+#app.PLAYERS = ['1','2']
                
 @app.route('/')
 def main():
