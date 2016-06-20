@@ -113,16 +113,7 @@ def play(p1='human',p2='remote',depth=0,heir="random"):
     heir  = str(heir)
     board = np.zeros(42)
     player = 1
-    player_type = {1:'human',-1:'human'}
-    print 'playing tic tac toe'
-    if p1 == "human":
-        player_type[1] = 'human'
-    else:
-        player_type[1] = 'remote'
-    if p2 == "human":
-        player_type[-1] =  'human'
-    else:
-        player_type[-1] = 'remote'
+    player_type = {1:str(p1),-1:str(p2)}
     print 'starting a game of connect Four'
     print [player_type[1], player_type[-1]], heir, type(heir)
     return render_template('connect_four.html',board = list(board),heir = [heir],
