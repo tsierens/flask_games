@@ -36,13 +36,13 @@ def winner(board):
         return 1 if np.any(rows==4) else -1
     cols = board[:3,:]+board[1:4,:]+board[2:5,:]+board[3:6,:]
     if np.any(cols == 4) or np.any(cols == -4):
-        return 1 if np.any(rows==4) else -1
+        return 1 if np.any(cols==4) else -1
     diag = board[:3,:4]+board[1:4,1:5]+board[2:5,2:6]+board[3:6,3:7]
     if np.any(diag == 4) or np.any(diag == -4):
-        return 1 if np.any(rows==4) else -1
+        return 1 if np.any(diag==4) else -1
     rdiag = board[5:2:-1,:4]+board[4:1:-1,1:5]+board[3:0:-1,2:6]+board[2::-1,3:7]
     if np.any(rdiag == 4) or np.any(rdiag == -4):
-        return 1 if np.any(rows==4) else -1
+        return 1 if np.any(rdiag==4) else -1
     return 0
 
 

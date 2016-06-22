@@ -11,7 +11,9 @@ import os
 from flask import Flask, render_template, request, redirect
 import flask_connect_four as fc4
 import flask_tic_tac_toe as ft3
-app = Flask(__name__)
+hello
+
+app = Flask(__name__, static_url_path='')
 #app.debug = True
 #app.GAMES = [r"Tic_Tac_Toe", r"Connect_Four"]
 #app.OPTIONS = [r"Human", r"Computer"]
@@ -42,12 +44,12 @@ def go():
         p1 = request.form.get("p1")
         p2 = request.form.get("p2")
         depth = int(request.form.get("depth"))
-        evaluation = request.form.get("eval")
-        print game, game == 'ttt'
-        if game == 'ttt':
+        evaluation = request.form.get("eval")       
+        print game, game == 'Tic-Tac-Toe'
+        if game == 'Tic-Tac-Toe':
             print 'calling tic tac toe initialization'
             return ft3.play(p1=p1,p2=p2,depth=depth,heir=evaluation)
-        if game == 'c4':
+        if game == 'Connect Four':
             print 'calling connect four initialization'
             return fc4.play(p1=p1,p2=p2,depth=depth,heir=evaluation)
     return None
