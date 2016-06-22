@@ -44,11 +44,11 @@ def go():
         p2 = request.form.get("p2")
         depth = int(request.form.get("depth"))
         evaluation = request.form.get("eval")       
-        print game, game == 'Tic-Tac-Toe'
-        if game == 'Tic-Tac-Toe':
+        print game, game == 'ttt'
+        if game == 'ttt':
             print 'calling tic tac toe initialization'
             return ft3.play(p1=p1,p2=p2,depth=depth,heir=evaluation)
-        if game == 'Connect Four':
+        if game == 'c4':
             print 'calling connect four initialization'
             return fc4.play(p1=p1,p2=p2,depth=depth,heir=evaluation)
     return None
