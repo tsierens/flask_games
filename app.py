@@ -11,7 +11,6 @@ import os
 from flask import Flask, render_template, request, redirect
 import flask_connect_four as fc4
 import flask_tic_tac_toe as ft3
-hello
 
 app = Flask(__name__, static_url_path='')
 #app.debug = True
