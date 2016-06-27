@@ -35,9 +35,9 @@ var tile_size = 60;
 var padding = 15;
 var cplayer = {{player|safe}};
 var input_player = cplayer;
-var heir = {{heir|safe}};
+var evals = {{evals|safe}};
 var board = {{board|safe}};
-var depth = {{depth|safe}};
+var depths = {{depths|safe}};
 var types = {{types | safe}};
 var finished= {{finished|safe}};
 var message = "";
@@ -49,7 +49,10 @@ if (cplayer == 1){
 else{
     move_type = types[1];
 }
-console.log(board)
+console.log(board);
+console.log(depths);
+console.log(types);
+console.log(evals);
 //var cplayer = 1;
 //var board = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 //var finished = -2;
@@ -164,16 +167,16 @@ function sendData(move) {
     node.value = board.toString();
     form.appendChild(node.cloneNode());
 
-    node.name = "depth";
-    node.value = depth.toString();
+    node.name = "depths";
+    node.value = depths.toString();
     form.appendChild(node.cloneNode());
 
     node.name = "types";
     node.value = types.toString();
     form.appendChild(node.cloneNode());
     
-    node.name = "heir";
-    node.value = heir
+    node.name = "evals";
+    node.value = evals.toString();
     form.appendChild(node.cloneNode());
 
     form.style.display = "none";

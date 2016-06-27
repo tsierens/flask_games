@@ -6,6 +6,7 @@ import time
 import sys
 import connect_four as cccc
 import os
+import json
 from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
@@ -40,7 +41,7 @@ def unupdate_move(board, move):
         board[0,move]=0
     return None
 
-def alpha_beta_move(board, turn, depth = 0, alpha = -inf, beta = inf, evaluation = lambda x: 0):
+def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf), evaluation = lambda x: 0):
     dummy_board = np.copy(board) # we don't want to change the board state
 
     swap_player = {1:-1,-1:1} # So we can change whose turn
@@ -55,7 +56,7 @@ def alpha_beta_move(board, turn, depth = 0, alpha = -inf, beta = inf, evaluation
 #         else:
 #             return (0,options[0])   
     
-    best_value = -inf
+    best_value = (-inf,-inf)
     
     if not options:
         print board, cccc.game_over(board)
@@ -64,11 +65,11 @@ def alpha_beta_move(board, turn, depth = 0, alpha = -inf, beta = inf, evaluation
     if depth == 0: 
         for x in options:
             update_move(dummy_board,x,turn)
-            op_value = evaluation(dummy_board*swap_player[turn])
+            op_value = (evaluation(dummy_board*swap_player[turn]) , depth)
 
-            if -op_value > best_value:
+            if tuple(-1 * el for el in op_value) > best_value:
                 cand_move = x
-                best_value = -op_value
+                best_value = tuple(-1 * el for el in op_value)
                 alpha = max(alpha, best_value)
     #        print depth,-op_value, best_value, cand_move,alpha,beta
             if alpha >= beta:
@@ -76,6 +77,8 @@ def alpha_beta_move(board, turn, depth = 0, alpha = -inf, beta = inf, evaluation
                 break   #alpha-beta cutoff
             unupdate_move(dummy_board,x)
     else:
+    
+    
     
         for x in options:
 
@@ -85,21 +88,21 @@ def alpha_beta_move(board, turn, depth = 0, alpha = -inf, beta = inf, evaluation
             update_move(dummy_board,x,turn)
         
             if cccc.winner(dummy_board): #should check over and tied too
-                return(inf, x)
+                return((inf,depth), x)
             
             if cccc.is_full(dummy_board): #This assumes you can't lose on your turn
-                return(0 , x)
+                return((0,depth) , x)
             
             op_value,_ = alpha_beta_move( dummy_board,
                                             swap_player[turn],
                                             depth-1,
-                                            alpha = - beta,
-                                            beta = - alpha,
+                                            alpha = tuple(-1 * el for el in beta),
+                                            beta = tuple(-1 * el for el in alpha),
                                             evaluation = evaluation)
 
-            if -op_value > best_value:
+            if tuple(-1 * el for el in op_value) > best_value:
                 cand_move = x
-                best_value = -op_value
+                best_value = tuple(-1 * el for el in op_value)
                 alpha = max(alpha, best_value)
     #        print depth,-op_value, best_value, cand_move,alpha,beta
             if alpha >= beta:
@@ -109,13 +112,13 @@ def alpha_beta_move(board, turn, depth = 0, alpha = -inf, beta = inf, evaluation
     #        dummy_board[height, x] = 0
     return (best_value, cand_move)
 
-def play(p1='human',p2='remote',depth=0,heir="random"):
-    heir  = str(heir)
-    board = np.zeros(42)
-    player = 1
-    player_type = {1:str(p1),-1:str(p2)}
+def play(types=['human','human'],depths=(0,0),evals = ("random","random")):
     print 'starting a game of connect Four'
-    print [player_type[1], player_type[-1]], heir, type(heir)
-    return render_template('connect_four.html',board = list(board),heir = [heir],
-                                   player =player, types = [player_type[1],player_type[-1]], depth = depth,finished = -2)
-    
+    return render_template('connect_four.html',
+                           board = list(np.zeros(42)),
+                           player = 1, 
+                           finished = -2,
+                           types = map(str,types),
+                           depths = list(depths),
+                           evals = map(str,evals))
+                           
