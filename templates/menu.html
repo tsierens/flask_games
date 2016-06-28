@@ -32,6 +32,7 @@
             }
         </style>
         <script>
+
             function to_disable(val, ids)
             {for (i=0; i < ids.length; i++){
                 if(val == 'remote'){
@@ -179,7 +180,7 @@
                         </select>
                     </div>
                     <div class = "col-md-2">    
-                        <select class="form-control" name = "p1depth" disabled = true>
+                        <select class="form-control" name = "p1depth">
                             <option value = 0>0-ply</option>
                             <option value = 2>2-ply</option>
                             <option value = 4 selected>4-ply</option>
@@ -187,7 +188,7 @@
                         </select>
                     </div>
                     <div class = "col-md-2">    
-                        <select class="form-control" name = "p1eval" disabled = true>
+                        <select class="form-control" name = "p1eval">
                             <option value = "random" selected>Random</option>
                             <option value = "nn">Neural Network</option>
                         </select>
@@ -196,7 +197,7 @@
                 <div class ="row">
                     <div class = "col-md-3 right"><h4>Player 2:</h4></div>
                     <div class = "col-md-2">    
-                        <select class="form-control" name = "p2type"onchange = "to_disable(this.value,['p2depth','p2eval'])">>
+                        <select class="form-control" name = "p2type" onchange = "to_disable(this.value,['p2depth','p2eval'])">>
                             <option value = "human">Human</option>
                             <option value = "remote" selected>AI</option>
                         </select>
@@ -262,7 +263,10 @@
 </div>
 </div>
 -->
-
+        <script>
+            window.onload = to_disable(document.getElementsByName("p1type")[0].value, ['p1depth','p1eval']);
+            window.onload = to_disable(document.getElementsByName("p2type")[0].value, ['p2depth','p2eval']);
+        </script>
     </body>
 </html>
 

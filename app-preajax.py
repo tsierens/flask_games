@@ -8,7 +8,7 @@ import sys
 import tic_tac_toe as ttt
 import connect_four as cccc
 import os
-from flask import Flask, render_template, request, redirect,jsonify
+from flask import Flask, render_template, request, redirect
 import flask_connect_four as fc4
 import flask_tic_tac_toe as ft3
 import json
@@ -109,7 +109,6 @@ def play_ttt():
     
 @app.route('/cccc',methods = ['POST'])
 def play_cccc():
-
     print "requesting move"
     player_index_dict = {-1:1,1:0}
     player = int(request.form.get("player"))
@@ -125,11 +124,6 @@ def play_cccc():
     types = map(lambda x: x.replace("\"",""),types.split(","))
     evals = request.form.get("evals").split(",")
     print "the eval method is ",evals[player_index_dict[player]]
-    if fc4.game_over(np.copy(board).reshape((6,7))):
-        finished = cccc.winner(board.reshape((6,7)))
-        return jsonify(finished = finished)
-    else:
-        finished = -2
     if evals[player_index_dict[player]] == 'nn':
         evaluation = fc4.net_value
     else:
@@ -149,19 +143,19 @@ def play_cccc():
         print board
         player *= -1
     board = board.reshape(42)
-    print 'next move is', move
-
-    return jsonify(move=move, player = -1*player, finished = finished)
-
+    print 'render next move'
+    if fc4.game_over(np.copy(board).reshape((6,7))):
+        finished = cccc.winner(board.reshape((6,7)))
+    else:
+        finished = -2
        
-    
-#render_template('connect_four.html',
-#                                   board = list(board),
-#                                   player = player,
-#                                   types = map(str,types),
-#                                   evals = map(str,evals),
-#                                   depths = depths,
-#                                   finished = finished)
+    return render_template('connect_four.html',
+                                   board = list(board),
+                                   player = player,
+                                   types = map(str,types),
+                                   evals = map(str,evals),
+                                   depths = depths,
+                                   finished = finished)
                
                
                

@@ -7,7 +7,7 @@ import sys
 import connect_four as cccc
 import os
 import json
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 
 app = Flask(__name__)
 #app.debug = True
@@ -19,7 +19,7 @@ def net_value(board):
     (m1,m2,m3,m4) = np.load('TD_cccc_100_1_6million(1).npz')['arr_0']
     board = np.copy(board).reshape((1,42))
     m5 = np.dot(board, m1) + m2
-    answer = np.tanh(np.dot(np.tanh(m5), m3) + m4) + random.random()*0.1 - 0.05
+    answer = np.tanh(np.dot(np.tanh(m5), m3) + m4) + random.random()*0.05 - 0.05
 #    print "node evaluation took {:.5}s".format(time.clock()-t0)
     return answer
 #    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4) + random.random()*0.1 - 0.05
