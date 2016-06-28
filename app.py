@@ -150,7 +150,10 @@ def play_cccc():
         player *= -1
     board = board.reshape(42)
     print 'next move is', move
-
+    if fc4.game_over(np.copy(board).reshape((6,7))):
+        finished = cccc.winner(board.reshape((6,7)))
+    else:
+        finished = -2
     return jsonify(move=move, player = -1*player, finished = finished)
 
        

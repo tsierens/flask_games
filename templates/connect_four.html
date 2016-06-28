@@ -1,19 +1,22 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
-        <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
-        <script src="http://code.jquery.com/jquery-latest.js"></script>
-        <script src="/static/js/bootstrap.min.js"></script>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta charset="UTF-8">
-        <title>Connect Four</title>
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
         <script type=text/javascript src="{{
-                                          url_for('static', filename='jquery.js') }}"></script>
+                                          url_for('static', filename='jquery.js') }}">
+        </script>   
+        <title>Connect Four</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
         <style>
             canvas {
                 position: absolute;
@@ -26,9 +29,27 @@
 
 
         </style>
-        <div align = "center">
-            <h1> Connect Four</h1>
 
+        <div class="jumbotron">
+            <h1 align = "center">Connect Four!</h1>
+            <div align = "center" id = "banner">
+                <form method = "post" action = "index">
+                    <div class = "btn-group">
+
+                        <button onclick= "location.href = '/';" class="btn btn-lg btn-info">Menu</button>
+
+                        <input type="hidden" name="game"  />
+                        <input type="hidden" name="p1type" />
+                        <input type="hidden" name="p2type"/>
+                        <input type="hidden" name="p1depth" />
+                        <input type="hidden" name="p2depth"/>
+                        <input type="hidden" name="p1eval" />
+                        <input type="hidden" name="p2eval" />
+                        <button  value="Submit" class="btn btn-success btn-lg" onclick = "playAgain();"> Play Again</button>
+                    </div>
+                </form>
+
+            </div>
 
         </div>
 
@@ -174,11 +195,11 @@
                         if (finished == -1){
                             message = "Player 2 is the winner!"}
                         //window.alert(message);
-                        var message_type = document.createElement("H1");
+                        var message_type = document.createElement("h2");
                         message_type.style.textAlign = "center";
                         var message_body = document.createTextNode(message);
                         message_type.appendChild(message_body);
-                        document.body.appendChild(message_type);
+                        document.getElementById('banner').appendChild(message_type);
                         message_sent = true
                     }
                     if (move_type == "remote" && !over() && !messageReceived){
@@ -195,31 +216,31 @@
                             evals : evals.toString()},
                                function(convo){
                             finished = convo.finished
-                            if (finished == -2){
-                                console.log('receiving reply');
-                                var move = convo.move;
-                                var rplayer = convo.player;
+
+                            console.log('receiving reply');
+                            var move = convo.move;
+                            var rplayer = convo.player;
 
 
-                                console.log(move);
-                                if (rplayer == cplayer && move_type == "remote"){
-                                    idx = moveFromCol(42+move);
-                                    data[idx].change(player);
-                                    board[idx]=cplayer;
-                                    cplayer = -1*cplayer;
+                            console.log(move);
+                            if (rplayer == cplayer && move_type == "remote"){
+                                idx = moveFromCol(42+move);
+                                data[idx].change(player);
+                                board[idx]=cplayer;
+                                cplayer = -1*cplayer;
 
-                                    if (cplayer == 1){
-                                        move_type = types[0];
-                                    }
-                                    else{
-                                        move_type = types[1];
-                                    }
-                                    if (move_type == "remote" &&  !over()){
-                                        messageReceived = false}
-                                    player = player === Tile.CIRCLE ? Tile.EX : Tile.CIRCLE;
+                                if (cplayer == 1){
+                                    move_type = types[0];
                                 }
-                                console.log('ajax');
+                                else{
+                                    move_type = types[1];
+                                }
+                                if (move_type == "remote" &&  !over()){
+                                    messageReceived = false}
+                                player = player === Tile.CIRCLE ? Tile.EX : Tile.CIRCLE;
                             }
+                            console.log('ajax');
+
                             render();
                         });
 
@@ -356,7 +377,7 @@
 
                     console.log(px,py)
 
-                    if (px % (tile_size+padding) >= padding && py >=padding && py <= canvas.width-2*padding && (move_type == "human") &&! over()) {
+                    if (px % (tile_size+padding) >= padding && py >=padding && py <= canvas.width-2*padding && (move_type == "human") && !over()) {
                         var idx = Math.floor(px / (padding+tile_size));
                         console.log(idx);
                         idx = moveFromCol(idx+42);                   
@@ -394,14 +415,24 @@
 
 
 
-
+                function giveElementValue(name, set){
+                    document.getElementsByName(name)[0].value = set;
+                }
+                function playAgain(){
+                    giveElementValue("game", "c4");
+                    giveElementValue("p1type", types[0]);
+                    giveElementValue("p2type", types[1]);
+                    giveElementValue("p1depth", depths[0].toString());
+                    giveElementValue("p2depth", depths[1].toString());
+                    giveElementValue("p1eval", evals[0].toString());
+                    giveElementValue("p2eval", evals[1].toString());
+                }
             </script>
+
         </div>
-        <div align = "center">
-            <div align = "center">
-                <button type="submit" class="btn btn-primary btn-block">Play Again</button>
-            </div>
-        </div>
+
+
+
         <!--
 <div align = "center">
 <form id='move-input' method='post' action = 'index'>
@@ -414,5 +445,5 @@ Move   <input type='text' name='choice' />
 </p>
 </form>
 </div>
--->
+-->   
     </body>
