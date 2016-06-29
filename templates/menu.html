@@ -33,17 +33,61 @@
         </style>
         <script>
 
-            function to_disable(val, ids)
-            {for (i=0; i < ids.length; i++){
-                if(val == 'remote'){
-                    console.log('disabling');
-                    document.getElementsByName(ids[i])[0].disabled=false;
-                }else{
-                    console.log('enabling');
-                    document.getElementsByName(ids[i])[0].disabled=true;
+
+
+            var types = ["p1type","p2type"];
+            var p1stuff = ["p1eval","p1depth"];
+            var p2stuff = ["p2eval","p2depth"];
+            var evals = ["p1eval","p2eval"];
+            var depths = ["p1depth","p2depth"];
+            var deep_ids = [["p1_six","p1_eight"],["p2_six","p2_eight"]];
+            var zero_ids = ["p1_zero","p2_zero"];
+            var stuff = [p1stuff,p2stuff];
+            function update_select(){
+                for (var i = 0; i < types.length;i++){
+                    for (var j =0; j < stuff[i].length;j++){                      
+                        document.getElementsByName(stuff[i][j])[0].disabled = 
+                            document.getElementsByName(types[i])[0].value == 'human';
+                    }
+
+                    for (var j = 0; j < deep_ids[i].length; j++){
+                        if (document.getElementsByName(evals[i])[0].value == 'nn'){
+
+                            document.getElementById(deep_ids[i][j]).disabled = true;
+                            if (document.getElementsByName(depths[i])[0].value >= 6){
+                                document.getElementById(zero_ids[i]).selected = true;
+                            }
+                        }else{
+                            document.getElementById(deep_ids[i][j]).disabled = false;
+                        }
+                    }
                 }
             }
-            }
+
+
+
+            //window.onload = update_select();
+            // function to_disable(val, ids)
+            // {for (i=0; i < ids.length; i++){
+            //     if(val == 'remote'){
+            //         console.log('disabling');
+            //         document.getElementsByName(ids[i])[0].disabled=false;
+            //     }else{
+            //         console.log('enabling');
+            //         document.getElementsByName(ids[i])[0].disabled=true;
+            //     }
+            // }
+            // }
+        </script>
+
+        <script> 
+            $(function(){
+                $("#navbar").load("static/snippets/navbar.html", function(){
+                    document.getElementById("index_page").class = "active";}); 
+            });
+        </script> 
+        <script>
+
         </script>
         <meta charset="utf-8">
         <title>Deep Learning</title>
@@ -59,57 +103,8 @@
     </head>
 
     <body style = "background-color : #ffffff;">
-        <div class="container">
-            <nav class="navbar navbar-default">
-                <div class="container-fluid">
-                    <!-- Brand and toggle get grouped for better mobile display -->
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <a class="navbar-brand" href="bio">About Todd Sierens</a>
-                    </div>
 
-                    <!-- Collect the nav links, forms, and other content for toggling -->
-                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                        <ul class="nav navbar-nav">
-                            <li class="active"><a href="#"> Play against the AI<span class="sr-only">(current)</span></a></li>
-                            <li><a href="flow">How the AI learns</a></li>
-                            <li><a href="minimax">How the AI plays</a></li>
-                            <!--  <li class="dropdown">
-<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-<ul class="dropdown-menu">
-<li><a href="#">Action</a></li>
-<li><a href="#">Another action</a></li>
-<li><a href="#">Something else here</a></li>
-<li role="separator" class="divider"></li>
-<li><a href="#">Separated link</a></li>
-<li role="separator" class="divider"></li>
-<li><a href="#">One more separated link</a></li>
-</ul> 
-</li>
-</ul>
-
-<ul class="nav navbar-nav navbar-right">
-<li><a href="#">Link</a></li>
-<li class="dropdown">
-<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-<ul class="dropdown-menu">
-<li><a href="#">Action</a></li>
-<li><a href="#">Another action</a></li>
-<li><a href="#">Something else here</a></li>
-<li role="separator" class="divider"></li>
-<li><a href="#">Separated link</a></li>
-</ul>
-</li>-->
-                        </ul> 
-                    </div><!-- /.navbar-collapse -->
-                </div><!-- /.container -->
-            </nav>
-        </div>
+        <div id = "navbar"> </div>
 
         <div class="jumbotron">
             <h2 align = "center">Play against a deep neural network!</h2>
@@ -174,21 +169,22 @@
 
 
                     <div class = "col-md-2">    
-                        <select class="form-control" name = "p1type" onchange = "to_disable(this.value,['p1depth','p1eval'])">
+                        <select class="form-control" name = "p1type" onchange = "update_select();">
                             <option value = "human" selected>Human</option>
                             <option value = "remote">AI</option>
                         </select>
                     </div>
                     <div class = "col-md-2">    
                         <select class="form-control" name = "p1depth">
-                            <option value = 0>0-ply</option>
+                            <option value = 0 id = "p1_zero">0-ply</option>
                             <option value = 2>2-ply</option>
                             <option value = 4 selected>4-ply</option>
-                            <option value = 6>6-ply</option>
+                            <option value = 6 id = "p1_six">6-ply</option>
+                            <option value = 8 id = "p1_eight">8-ply</option>
                         </select>
                     </div>
                     <div class = "col-md-2">    
-                        <select class="form-control" name = "p1eval">
+                        <select class="form-control" name = "p1eval" onchange = "update_select();">
                             <option value = "random" selected>Random</option>
                             <option value = "nn">Neural Network</option>
                         </select>
@@ -197,21 +193,22 @@
                 <div class ="row">
                     <div class = "col-md-3 right"><h4>Player 2:</h4></div>
                     <div class = "col-md-2">    
-                        <select class="form-control" name = "p2type" onchange = "to_disable(this.value,['p2depth','p2eval'])">>
+                        <select class="form-control" name = "p2type" onchange = "update_select();">
                             <option value = "human">Human</option>
                             <option value = "remote" selected>AI</option>
                         </select>
                     </div>
                     <div class = "col-md-2">    
                         <select class="form-control" name = "p2depth">
-                            <option value = 0>0-ply</option>
+                            <option value = 0 id = "p2_zero">0-ply</option>
                             <option value = 2>2-ply</option>
                             <option value = 4 selected >4-ply</option>
-                            <option value = 6>6-ply</option>
+                            <option value = 6 id = "p2_six">6-ply</option>
+                            <option value = 8 id = "p2_eight">8-ply</option>
                         </select>
                     </div>
                     <div class = "col-md-2">    
-                        <select class="form-control" name = "p2eval">
+                        <select class="form-control" name = "p2eval" onchange = "update_select();">
                             <option value = "random">Random</option>
                             <option value = "nn" selected>Neural Network</option>
                         </select>
@@ -263,10 +260,7 @@
 </div>
 </div>
 -->
-        <script>
-            window.onload = to_disable(document.getElementsByName("p1type")[0].value, ['p1depth','p1eval']);
-            window.onload = to_disable(document.getElementsByName("p2type")[0].value, ['p2depth','p2eval']);
-        </script>
+        <script>window.onload = update_select();</script>
     </body>
 </html>
 
