@@ -184,7 +184,7 @@
                         data[i].update();
                     }
                 }
-                
+
                 function render() {
                     //console.log('render');
                     if (cplayer == 1){
@@ -239,7 +239,7 @@
                             var move = convo.move;
                             var rplayer = convo.player;
 
-                            
+
                             console.log(move);
                             if (rplayer == cplayer && move_type == "remote"){
                                 update();
@@ -334,6 +334,15 @@
 
                         Tile.CIRCLE = new Image();
                         Tile.CIRCLE.src = canvas_element.toDataURL();
+                        
+                        //New Circle
+                        canvas_ctx.fillStyle = "#eeee00"
+                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+                        Tile.NEWCIRCLE = new Image();
+                        Tile.NEWCIRCLE.src = canvas_element.toDataURL();
+                        
+                        canvas_ctx.fillStyle = "#00FFFF";
+                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
 
                         //EX
                         canvas_ctx.strokeStyle = "#C04040"
@@ -348,33 +357,10 @@
 
                         Tile.EX = new Image();
                         Tile.EX.src = canvas_element.toDataURL();
-
-
-
-                        //New Circle
-                        canvas_ctx.fillStyle = "#eeee00"
-                        canvas_ctx.strokeStyle = "#606090";
-                        //canvas_ctx.strokeStyle = "#5cb85c"; bootstrap success
-                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
-
-                        canvas_ctx.beginPath();
-                        canvas_ctx.arc(tile_size/2,tile_size/2,tile_size/2 - padding,0,2*Math.PI);
-                        canvas_ctx.stroke();
-
-                        Tile.NEWCIRCLE = new Image();
-                        Tile.NEWCIRCLE.src = canvas_element.toDataURL();
-
+                        
                         //New EX
-                        canvas_ctx.strokeStyle = "#C04040"
+                        canvas_ctx.fillStyle = "#eeee00"
                         canvas_ctx.fillRect(0,0,tile_size,tile_size);
-
-                        canvas_ctx.beginPath();
-                        canvas_ctx.moveTo(padding,padding);
-                        canvas_ctx.lineTo(tile_size - padding,tile_size - padding);
-                        canvas_ctx.moveTo(tile_size - padding,padding);
-                        canvas_ctx.lineTo(padding,tile_size - padding);
-                        canvas_ctx.stroke();
-
                         Tile.NEWEX = new Image();
                         Tile.NEWEX.src = canvas_element.toDataURL();
 
