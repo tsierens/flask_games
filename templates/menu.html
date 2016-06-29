@@ -83,11 +83,11 @@
         <script> 
             $(function(){
                 $("#navbar").load("static/snippets/navbar.html", function(){
-                    document.getElementById("index_page").class = "active";}); 
-            });
+                    $("#index_page").addClass("active");} 
+                                  )});
         </script> 
         <script>
-
+          //  $("#index_page").addClass( "active");
         </script>
         <meta charset="utf-8">
         <title>Deep Learning</title>

@@ -68,8 +68,9 @@
 
         <script> 
             $(function(){
-                $("#navbar").load("static/snippets/navbar.html"); 
-            });
+                $("#navbar").load("static/snippets/navbar.html", function(){
+                    $("#minimax_page").addClass("active");} 
+                                  )});
         </script> 
         <meta charset="utf-8">
         <title>Deep Learning</title>
