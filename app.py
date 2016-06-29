@@ -13,7 +13,7 @@ import flask_connect_four as fc4
 import flask_tic_tac_toe as ft3
 import json
 
-app = Flask(__name__, static_url_path='')
+app = Flask(__name__,)
 #app.debug = True
 #app.GAMES = [r"Tic_Tac_Toe", r"Connect_Four"]
 #app.OPTIONS = [r"Human", r"Computer"]
@@ -71,8 +71,20 @@ def go():
             return fc4.play(types =(p1,p2),depths = (p1depth,p2depth),evals = (p1eval,p2eval))
     return None
             
+@app.route('/flow', methods = ['get'])
+def flow():
+    return render_template("flow.html")
+                           
+@app.route('/minimax', methods = ['get'])
+def minimax():
+    return render_template("minimax.html")
+
+@app.route('/bio', methods = ['get'])
+def bio():
+    return render_template("bio.html")
     
-               
+    
+    
 @app.route('/ttt',methods = ['POST'])
 def play_ttt():
     player_index_dict = {-1:1,1:0}
