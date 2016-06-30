@@ -23,6 +23,7 @@
                 text-align:center;
             }
             .board_container{
+
                 width : 50%;
                 margin-left: 25%;
             }
@@ -41,7 +42,6 @@
 
         </style>
 
-
         <div class="jumbotron">
             <h1 align = "center">Connect Four!</h1>
             <div class = "centered" >
@@ -54,7 +54,7 @@
                         <div class = "col-sm-3">
                             <button onclick= "location.href = '/';" class="btn btn-lg btn-block btn-info">Menu</button>
                         </div>
-                        <div class = "col-sm-2" id = "winner"></div>
+                        <div class = "col-sm-2"></div>
                         <div class = "col-sm-3">
                             <form method = "post" action = "index">
                                 <input type="hidden" name="game"  />
@@ -136,6 +136,11 @@
                 canvas_height = 600;
                 $("#board").get(0).width = canvas_width;
                 $("#board").get(0).height = canvas_height;
+
+
+
+
+
 
                 tile_size = Math.round(Math.min( canvas_width/ 9.0 ,  canvas_height / 7.75))
 
@@ -254,7 +259,7 @@
                             data[winX[i] + 7 * winY[i]].change(win_tile);
                         }
                         console.log(message);
-                        var message_type = document.createElement("h3");
+                        var message_type = document.createElement("h1");
                         message_type.style.textAlign = "center";
                         var message_body = document.createTextNode(message);
                         message_type.appendChild(message_body);
@@ -265,6 +270,18 @@
 
 
                 }
+
+                var ratio = 0;
+                var max_height = $(window).height() * 1.0;
+                var max_width = $(document.body).width() * 0.75;
+
+
+                var set_width = max_width < max_height * 6. / 7. ? max_width: max_height * 6. / 7.;
+                var div_width = $("#board").offsetWidth
+                
+                $(".board_container").css({"width" :  set_width,
+                                           "margin-left" : ($(document.body).width()- set_width)/2,
+                                           "height" :  set_width * 6. / 7.});
 
                 for (var i = data.length; i--;) {
                     data[i].draw(ctx);}
@@ -490,7 +507,7 @@
                 pad_left =Math.round((canvas_width - tile_size * 9.0) / 2.);
                 pad_top = Math.round((canvas_height - tile_size * 7.75) / 2.);
 
-                padding = tile_size / 4.0
+                padding = Math.round(tile_size / 4.0);
                 var px = evt.clientX - el.offsetLeft;// - pad_left;
                 var py = evt.clientY - el.offsetTop;// - pad_top;
 
@@ -565,7 +582,7 @@
         <div class = "centered">
             <div class = "board_container centered" id = "canvas_div">
             </div>
-
+            <div id = "winner"></div>
 
         </div>
     </body>
