@@ -131,6 +131,7 @@ def play_cccc():
     board = board.split(",")
     board = [int(x) for x in board]
     board = np.array(board).reshape((6,7))
+    move =0
     print "the board is "
     print board
     types = request.form.get("types")
@@ -139,8 +140,11 @@ def play_cccc():
     print "the eval method is ",evals[player_index_dict[player]]
     if fc4.game_over(np.copy(board).reshape((6,7))):
         finished = cccc.winner(board.reshape((6,7)))
-        return jsonify(finished = finished)
+        winners = map(list,zip(*fc4.winning_squares(board)))
+        print winners
+        return jsonify(finished = finished, y=winners[0],x=winners[1])
     else:
+        winners = []
         finished = -2
     if evals[player_index_dict[player]] == 'nn':
         evaluation = fc4.net_value
@@ -161,12 +165,14 @@ def play_cccc():
         print board
         player *= -1
     board = board.reshape(42)
-    print 'next move is', move
+#    print 'next move is', move
     if fc4.game_over(np.copy(board).reshape((6,7))):
         finished = cccc.winner(board.reshape((6,7)))
+        winners = fc4.winning_squares(board)
     else:
         finished = -2
-    return jsonify(move=move, player = -1*player, finished = finished)
+        winners = []
+    return jsonify(move=move, player = -1*player, finished = finished, winners = winners)
 
        
     

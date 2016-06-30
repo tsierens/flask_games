@@ -41,6 +41,29 @@ def unupdate_move(board, move):
         board[0,move]=0
     return None
 
+def winning_squares(board):
+    board = board.reshape((6,7))
+    coords = set()
+    for i in range(6):#rows
+        for j in range(4):
+            if abs(np.sum(board[i,j:j+4]))==4:               
+                coords.update([(i,j+k) for k in range(4)])
+    for i in range(3):#cols
+        for j in range(7):
+            if abs(np.sum(board[i:i+4,j]))==4:                
+                coords.update([(i+k,j) for k in range(4)])   
+    for i in range(3):#diag
+        for j in range(4):
+            if abs(np.sum(np.diag(board[i:i+4,j:j+4])))==4:
+                coords.update([(i+k,j+k) for k in range(4)])  
+    for i in range(3):#rdiag
+        for j in range(4):
+            if abs(np.sum(np.diag(np.fliplr(board[i:i+4,j:j+4]))))==4:
+                coords.update([(i+k,3+j-k) for k in range(4)]) 
+    return list(coords)
+
+
+
 def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf), evaluation = lambda x: 0):
     dummy_board = np.copy(board) # we don't want to change the board state
 
@@ -49,6 +72,7 @@ def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf
     random.shuffle(options) # should inherit move order instead of randomizing
 
 
+    
 #     if len(options) == 1:
 #         update_move(board,options[0])
 #         if cccc.winner(dummy_board):

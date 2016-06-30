@@ -30,6 +30,7 @@ def available_moves(board):
     return [move for move in xrange(7) if not np.product(board[:,move])]
 
 
+
 def winner(board):
     rows = board[:,:4]+board[:,1:5]+board[:,2:6]+board[:,3:7]
     if np.any(rows == 4) or np.any(rows == -4):
