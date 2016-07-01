@@ -46,7 +46,135 @@
 
         <script>
 
+            window.onload = function main() {
 
+            }
+
+            function init(){
+
+            }
+
+            function over(){
+                return finished == 1 || finished == 0 || finished == -1;
+            }
+
+
+            function update() {
+                for (var i = data.length; i--;) {
+                    data[i].update();
+                }
+
+
+
+                function render() {
+
+                }
+
+                function Tile(x,y) {
+
+                    var x = x,  y = y;
+                    var tile = Tile.EMPTY;
+
+                    if (tile == null) {
+                        var canvas_element = document.createElement("canvas");
+                        canvas_element.width = canvas_element.height = tile_size;
+                        var canvas_ctx = canvas_element.getContext("2d");
+
+                        //canvas_ctx.fillStyle = "#00FFFF";
+                        canvas_ctx.fillStyle = "#5bc0de";// bootstrap info
+                        //canvas_ctx.fillStyle = "#428bca";// bootstrap primary
+                        //canvas_ctx.fillStyle = "#d2b48c";
+                        canvas_ctx.lineWidth = 4;
+                        canvas_ctx.lineCap = "round";
+
+                        //Empty
+                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+                        Tile.EMPTY = new Image();
+                        Tile.EMPTY.src = canvas_element.toDataURL();
+
+                        //Circle
+                        //canvas_ctx.strokeStyle = "#606090";
+                        //canvas_ctx.strokeStyle = "#5cb85c"; //bootsrap success
+                        canvas_ctx.strokeStyle = "#555588";
+                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+
+                        canvas_ctx.beginPath();
+                        canvas_ctx.arc(tile_size/2,tile_size/2,tile_size/2 - padding,0,2*Math.PI);
+                        canvas_ctx.stroke();
+
+                        Tile.CIRCLE = new Image();
+                        Tile.CIRCLE.src = canvas_element.toDataURL();
+
+                        //EX
+                        canvas_ctx.strokeStyle = "#CC4444"
+                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+
+                        canvas_ctx.beginPath();
+                        canvas_ctx.moveTo(padding,padding);
+                        canvas_ctx.lineTo(tile_size - padding,tile_size - padding);
+                        canvas_ctx.moveTo(tile_size - padding,padding);
+                        canvas_ctx.lineTo(padding,tile_size - padding);
+                        canvas_ctx.stroke();
+
+                        Tile.EX = new Image();
+                        Tile.EX.src = canvas_element.toDataURL();
+
+
+
+                        //New Circle
+                        //canvas_ctx.fillStyle = "#ffff00";
+                        canvas_ctx.fillStyle = "#CCCC33";
+                        canvas_ctx.fillStyle = "#30eeee";
+                        //canvas_ctx.fillStyle = "#5cb85c";// bootstrap success
+                        //canvas_ctx.fillStyle = "#5bc0de";// boostrap info
+                        //canvas_ctx.fillStyle = "#428bca";// bootstrap primary
+                        //canvas_ctx.fillStyle = "#f9f9f9";// bootstrap default
+                        //canvas_ctx.strokeStyle = "#606090";
+                        //canvas_ctx.strokeStyle = "#5cb85c"; bootstrap success
+                        canvas_ctx.strokeStyle = "#555588";
+                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+
+                        canvas_ctx.beginPath();
+                        canvas_ctx.arc(tile_size/2,tile_size/2,tile_size/2 - padding,0,2*Math.PI);
+                        canvas_ctx.stroke();
+
+                        Tile.NEWCIRCLE = new Image();
+                        Tile.NEWCIRCLE.src = canvas_element.toDataURL();
+
+                        //New EX
+                        canvas_ctx.strokeStyle = "#CC4444";
+                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+
+                        canvas_ctx.beginPath();
+                        canvas_ctx.moveTo(padding,padding);
+                        canvas_ctx.lineTo(tile_size - padding,tile_size - padding);
+                        canvas_ctx.moveTo(tile_size - padding,padding);
+                        canvas_ctx.lineTo(padding,tile_size - padding);
+                        canvas_ctx.stroke();
+
+                        Tile.NEWEX = new Image();
+                        Tile.NEWEX.src = canvas_element.toDataURL();
+
+                        tile = Tile.NEWEX;
+
+                    }
+                    this.update = function() {
+                        tile = tile === Tile.NEWEX ? Tile.EX : tile;
+                        tile = tile === Tile.NEWCIRCLE ? Tile.CIRCLE : tile;
+                    }
+
+                    this.change = function(next){
+                        tile = next;
+                    }
+
+                    this.draw = function(ctx) {
+                        ctx.drawImage(tile, x, y);
+                    }
+
+                    this.hasData = function(){
+                        return tile !== Tile.EMPTY;
+                    }
+                }
         </script>
 
     </head>
