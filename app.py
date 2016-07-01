@@ -79,6 +79,10 @@ def flow():
 def minimax():
     return render_template("minimax.html")
 
+@app.route('/performance', methods = ['get'])
+def performance():
+    return render_template("performance.html")
+
 @app.route('/bio', methods = ['get'])
 def bio():
     return render_template("bio.html")

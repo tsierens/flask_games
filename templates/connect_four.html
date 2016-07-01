@@ -170,6 +170,7 @@
             }
 
             function init(){
+                
                 console.log('init');
                 if (data == null) {
                     data =[];
@@ -180,6 +181,8 @@
                         data.push(new Tile(x,y));
                     }
                 }
+                
+                //$(".board_container").resizable();
                 for (var i = board.length; i--;) {
                     if (board[i] == 1){
                         marker = Tile.EX;
@@ -282,6 +285,7 @@
                 $(".board_container").css({"width" :  set_width,
                                            "margin-left" : ($(document.body).width()- set_width)/2,
                                            "height" :  set_width * 6. / 7.});
+                
 
                 for (var i = data.length; i--;) {
                     data[i].draw(ctx);}
