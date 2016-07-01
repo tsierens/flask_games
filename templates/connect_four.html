@@ -6,7 +6,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen">
         <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
+        <!--<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">--->
         <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
         <script src="/static/js/bootstrap.min.js"></script> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,6 +20,9 @@
         <title>Connect Four</title>
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <style>
+
+            #resizable { width: 150px; height: 150px; padding: 0.5em; }
+            #resizable h3 { text-align: center; margin: 0; }
             .centered
             {
                 text-align:center;
@@ -170,7 +175,7 @@
             }
 
             function init(){
-                
+
                 console.log('init');
                 if (data == null) {
                     data =[];
@@ -181,7 +186,7 @@
                         data.push(new Tile(x,y));
                     }
                 }
-                
+
                 //$(".board_container").resizable();
                 for (var i = board.length; i--;) {
                     if (board[i] == 1){
@@ -224,15 +229,15 @@
 
             function render() {
                 //console.log('render');
-                if (cplayer == 1){
-                    move_type = types[0];
-                }
-                else{
-                    move_type = types[1];
-                }
+
+                move_type = cplayer == 1 ? types[0]:types[1];
                 //    ctx.clearRect(0,0,canvas.width,canvas.height);
+                for (var i = data.length; i--;) {
+                    data[i].draw(ctx);}
 
                 if (over() && end_message){
+                    update();
+                    console.log('test')
                     end_message = false;
                     $.post("cccc",{
                         player : cplayer.toString(),
@@ -281,14 +286,12 @@
 
                 var set_width = max_width < max_height * 6. / 7. ? max_width: max_height * 6. / 7.;
                 var div_width = $("#board").offsetWidth
-                
+
                 $(".board_container").css({"width" :  set_width,
                                            "margin-left" : ($(document.body).width()- set_width)/2,
                                            "height" :  set_width * 6. / 7.});
-                
 
-                for (var i = data.length; i--;) {
-                    data[i].draw(ctx);}
+
 
                 if (move_type == "remote" && !over() && over_check && !messageReceived){
                     messageReceived = true
@@ -304,7 +307,6 @@
                         evals : evals.toString()},
                            function(convo){
                         finished = convo.finished;
-                        over_check = true;
                         console.log('receiving reply');
                         var move = convo.move;
                         var rplayer = convo.player;
@@ -517,7 +519,7 @@
 
                 console.log(px,py)
 
-                if (px % (tile_size+padding) >= padding && py >=padding && py <= $("#board")[0].width-2*padding && (move_type == "human") && !over() && over_check) {
+                if (px % (tile_size+padding) >= padding && py >=padding && py <= canvas_width-2*padding && (move_type == "human") && !over() && over_check) {
                     var idx = Math.floor(px / (padding+tile_size));
                     console.log(idx);
                     idx = moveFromCol(idx+42);                   
@@ -536,31 +538,45 @@
                         move_type = types[1];
                     }
 
-                    $.post("cccc",{
-                        player : cplayer.toString(),
-                        board : board.toString(),
-                        depths : depths.toString(),
-                        types : types.toString(),
-                        evals : evals.toString()},
-                           function(convo){
-                        finished = convo.finished;
-                        over_check = true;
-                        if (move_type == "remote" &&  !over()){
-                            messageReceived = false;}
 
 
-                        console.log(move_type, messageReceived)
+                    if (!over_check){
+                        $.post("cccc",{
+                            overcheck : "true",
+                            player : cplayer.toString(),
+                            board : board.toString(),
+                            depths : depths.toString(),
+                            types : types.toString(),
+                            evals : evals.toString()},
+                               function(convo){
+                            finished = convo.finished;
+                            console.log(convo.finished);
+                            over_check = true;
+                            if (move_type == "remote" &&  !over()){
+                                messageReceived = false;}
 
-                        var iframe = document.createElement("iframe");  //what does this even do?
-                        window.addEventListener("load",function(){
-                            iframe.style.display = "none";
-                            document.body.appendChild(iframe);});
 
 
-                        //$.post(URL,data,callback);   //syntax for ajax post
+                            console.log(move_type, messageReceived);
 
-                        //sendData(idx);
-                        render();})
+                            var iframe = document.createElement("iframe");  //what does this even do?
+                            window.addEventListener("load",function(){
+                                iframe.style.display = "none";
+                                document.body.appendChild(iframe);})
+                            render();
+                        })
+                    }
+
+
+
+
+
+
+
+                    //$.post(URL,data,callback);   //syntax for ajax post
+
+                    //sendData(idx);
+
                 }
 
                 return
@@ -584,7 +600,7 @@
             }
         </script>
         <div class = "centered">
-            <div class = "board_container centered" id = "canvas_div">
+            <div class = "board_container centered ui-widget-content" id = "canvas_div">
             </div>
             <div id = "winner"></div>
 

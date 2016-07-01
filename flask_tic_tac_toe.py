@@ -15,36 +15,60 @@ class alpha_beta:
     def make_move(self,board,active_turn):
         #print (board,active_turn,self.depth)
         return alpha_beta_move(board,active_turn,self.depth)[1]
-def alpha_beta_move(board,active_turn,depth,alpha = 2):
-    swap_dict = {1:-1,-1:1}
-    dummy_board = np.copy(np.array(board))
-    options = ttt.available_moves(dummy_board)
-    random.shuffle(options)
-    if len(options) == 1:
-        dummy_board[options[0]] = active_turn
-        if ttt.winner(dummy_board):
-            return (1,options[0]+1)
-        else:
-            return (0,options[0]+1)
-    if depth ==0:
-        return (0, options[np.random.randint(len(options))]+1)
+def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf), evaluation = lambda x: 0):
+    dummy_board = np.copy(board).reshape(9) # we don't want to change the board state
 
-    best_value = -2
-    candidate_move = None
-    for x in options:
-        dummy_board[x] = active_turn
-        if ttt.winner(dummy_board):
-            return (1, x+1)
-        (opp_value,opp_move) = alpha_beta_move(dummy_board,swap_dict[active_turn],depth-1,-best_value)
-        if -opp_value > best_value:
-            candidate_move = x+1
-            best_value = -opp_value
-        if -opp_value >= alpha:
-            #print (options, x, best_value, alpha)
-            break
-        dummy_board[x] = board[x]
+    swap_player = {1:-1,-1:1} # So we can change whose turn
+    options = cccc.available_moves(board) # get legal moves
+    random.shuffle(options) # should inherit move order instead of randomizing
 
-    return (best_value, candidate_move)
+    best_value = (-inf,-inf)
+    
+    if not options:
+        print board, cccc.game_over(board)
+        print 'oops, no available moves'
+    cand_move = options[0]
+    if depth == 0: 
+        for x in options:
+            dummy_board[x] = turn
+            op_value = (evaluation(dummy_board*swap_player[turn]) , depth)
+
+            if tuple(-1 * el for el in op_value) > best_value:
+                cand_move = x
+                best_value = tuple(-1 * el for el in op_value)
+                alpha = max(alpha, best_value)
+            if alpha >= beta:
+                break   #alpha-beta cutoff
+            unupdate_move(dummy_board,x)
+    else:
+        for x in options:
+
+            update_move(dummy_board,x,turn)
+        
+            if cccc.winner(dummy_board): #should check over and tied too
+                return((inf,depth), x)
+            
+            if cccc.is_full(dummy_board): #This assumes you can't lose on your turn
+                return((0,depth) , x)
+            
+            op_value,_ = alpha_beta_move( dummy_board,
+                                            swap_player[turn],
+                                            depth-1,
+                                            alpha = tuple(-1 * el for el in beta),
+                                            beta = tuple(-1 * el for el in alpha),
+                                            evaluation = evaluation)
+
+            if tuple(-1 * el for el in op_value) > best_value:
+                cand_move = x
+                best_value = tuple(-1 * el for el in op_value)
+                alpha = max(alpha, best_value)
+    #        print depth,-op_value, best_value, cand_move,alpha,beta
+            if alpha >= beta:
+    #                print 'pruned'
+                break   #alpha-beta cutoff
+            unupdate_move(dummy_board,x)
+    #        dummy_board[height, x] = 0
+    return (best_value, cand_move)
 
 def play(p1='human',p2='remote',depth=0,heir=None):
     board = np.zeros(9)

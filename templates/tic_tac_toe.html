@@ -45,14 +45,71 @@
         <!--<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>-->
 
         <script>
+            var over_checked = true;
+            var post_requested = false;
+            var cplayer = {{player|safe}};
+            var input_player = cplayer;
+            var evals = {{evals|safe}};
+            var board = {{board|safe}};
+            var depths = {{depths|safe}};
+            var types = {{types | safe}};
+            var finished= {{finished|safe}};
+            var display_message = false;
 
             window.onload = function main() {
+                var canvas_div = document.getElementById("canvas_div");  //what does this even do
+                var $canvas = $("<canvas>", {id: "board"});
+                $canvas.appendTo(canvas_div);
+                ctx = $("#board").get(0).getContext('2d');
+                var canvas_width = $("#board").get(0).width;
+                var canvas_height = $("#board").get(0).height;
+                console.log(canvas_width,canvas_height);
 
-            }
+                canvas_width = 700;
+                canvas_height = 600;
+                $("#board").get(0).width = canvas_width;
+                $("#board").get(0).height = canvas_height;
+
+                var tile_size = Math.round(Math.min( canvas_width/ 3.75 ,  canvas_height / 3.75))
+
+                var padding = tile_size / 4.0
+                }
 
             function init(){
+                if (data == null) {
+                    data =[];
 
+                    for (var i = 0; i < 9; i++){
+                        var x = (i % 3)*(tile_size+padding) + padding + pad_left;
+                        var y = Math.floor(i / 3 + 0.01)*(tile_size+padding) + padding + pad_top;
+                        data.push(new Tile(x,y));
+                    }
+                }
+
+                //$(".board_container").resizable();
+                for (var i = board.length; i--;) {
+                    if (board[i] == 1){
+                        marker = Tile.EX;
+                    }
+                    if (board[i] == 0){
+                        marker = Tile.EMPTY;
+                    }
+                    if (board[i] == -1){
+                        marker = Tile.CIRCLE;
+                    }
+                    data[i].change(marker);
+                }
+                if (cplayer == 1){
+                    var player = Tile.NEWEX;
+                }
+
+                if (cplayer == -1){
+                    var player = Tile.NEWCIRCLE;
+                }
+
+                render();
             }
+
 
             function over(){
                 return finished == 1 || finished == 0 || finished == -1;
@@ -63,118 +120,227 @@
                 for (var i = data.length; i--;) {
                     data[i].update();
                 }
+            }
 
 
+            function render() {
 
-                function render() {
+
+                var max_height = $(window).height() * 0.6;
+                var max_width = $(document.body).width() * 0.5;
+
+
+                var set_width = max_width < max_height ? max_width: max_height ;
+                var div_width = $("#board").offsetWidth
+
+                $(".board_container").css({"width" :  set_width,
+                                           "margin-left" : ($(document.body).width()- set_width)/2,
+                                           "height" :  set_width});
+
+
+                for (var i = data.length; i--;) {
+                    data[i].draw(ctx);}
+                move_type = cplayer == 1 ? types[0]:types[1];
+                if (move_type == "remote" && !over() %% over_checked && post_requested == false){
+                    post_requested == true;
+
+                    $.post("cccc",{
+                        player : cplayer.toString(),
+                        board : board.toString(),
+                        depths : depths.toString(),
+                        types : types.toString(),
+                        evals : evals.toString()},
+                           function(convo){
+                        finished = convo.finished;
+                        over_checked = true;
+                        var move = convo.move;
+                        var rplayer = convo.player;
+
+
+                        update();
+                        idx = move;
+                        data[idx].change(player);
+                        board[idx]=cplayer;
+                        cplayer = -1*cplayer;
+
+                        move_type = cplayer == 1 ? types[0]:types[1];
+
+                        player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
+                        post_requested == false;
+                        render();
+                    });
+
+
 
                 }
 
-                function Tile(x,y) {
+            }
 
-                    var x = x,  y = y;
-                    var tile = Tile.EMPTY;
+            function Tile(x,y) {
 
-                    if (tile == null) {
-                        var canvas_element = document.createElement("canvas");
-                        canvas_element.width = canvas_element.height = tile_size;
-                        var canvas_ctx = canvas_element.getContext("2d");
+                var x = x,  y = y;
+                var tile = Tile.EMPTY;
 
-                        //canvas_ctx.fillStyle = "#00FFFF";
-                        canvas_ctx.fillStyle = "#5bc0de";// bootstrap info
-                        //canvas_ctx.fillStyle = "#428bca";// bootstrap primary
-                        //canvas_ctx.fillStyle = "#d2b48c";
-                        canvas_ctx.lineWidth = 4;
-                        canvas_ctx.lineCap = "round";
+                if (tile == null) {
+                    var canvas_element = document.createElement("canvas");
+                    canvas_element.width = canvas_element.height = tile_size;
+                    var canvas_ctx = canvas_element.getContext("2d");
 
-                        //Empty
-                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
-                        Tile.EMPTY = new Image();
-                        Tile.EMPTY.src = canvas_element.toDataURL();
+                    //canvas_ctx.fillStyle = "#00FFFF";
+                    canvas_ctx.fillStyle = "#5bc0de";// bootstrap info
+                    //canvas_ctx.fillStyle = "#428bca";// bootstrap primary
+                    //canvas_ctx.fillStyle = "#d2b48c";
+                    canvas_ctx.lineWidth = 4;
+                    canvas_ctx.lineCap = "round";
 
-                        //Circle
-                        //canvas_ctx.strokeStyle = "#606090";
-                        //canvas_ctx.strokeStyle = "#5cb85c"; //bootsrap success
-                        canvas_ctx.strokeStyle = "#555588";
-                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+                    //Empty
+                    canvas_ctx.fillRect(0,0,tile_size,tile_size);
+                    Tile.EMPTY = new Image();
+                    Tile.EMPTY.src = canvas_element.toDataURL();
 
-                        canvas_ctx.beginPath();
-                        canvas_ctx.arc(tile_size/2,tile_size/2,tile_size/2 - padding,0,2*Math.PI);
-                        canvas_ctx.stroke();
+                    //Circle
+                    //canvas_ctx.strokeStyle = "#606090";
+                    //canvas_ctx.strokeStyle = "#5cb85c"; //bootsrap success
+                    canvas_ctx.strokeStyle = "#555588";
+                    canvas_ctx.fillRect(0,0,tile_size,tile_size);
 
-                        Tile.CIRCLE = new Image();
-                        Tile.CIRCLE.src = canvas_element.toDataURL();
+                    canvas_ctx.beginPath();
+                    canvas_ctx.arc(tile_size/2,tile_size/2,tile_size/2 - padding,0,2*Math.PI);
+                    canvas_ctx.stroke();
 
-                        //EX
-                        canvas_ctx.strokeStyle = "#CC4444"
-                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+                    Tile.CIRCLE = new Image();
+                    Tile.CIRCLE.src = canvas_element.toDataURL();
 
-                        canvas_ctx.beginPath();
-                        canvas_ctx.moveTo(padding,padding);
-                        canvas_ctx.lineTo(tile_size - padding,tile_size - padding);
-                        canvas_ctx.moveTo(tile_size - padding,padding);
-                        canvas_ctx.lineTo(padding,tile_size - padding);
-                        canvas_ctx.stroke();
+                    //EX
+                    canvas_ctx.strokeStyle = "#CC4444"
+                    canvas_ctx.fillRect(0,0,tile_size,tile_size);
 
-                        Tile.EX = new Image();
-                        Tile.EX.src = canvas_element.toDataURL();
+                    canvas_ctx.beginPath();
+                    canvas_ctx.moveTo(padding,padding);
+                    canvas_ctx.lineTo(tile_size - padding,tile_size - padding);
+                    canvas_ctx.moveTo(tile_size - padding,padding);
+                    canvas_ctx.lineTo(padding,tile_size - padding);
+                    canvas_ctx.stroke();
+
+                    Tile.EX = new Image();
+                    Tile.EX.src = canvas_element.toDataURL();
 
 
 
-                        //New Circle
-                        //canvas_ctx.fillStyle = "#ffff00";
-                        canvas_ctx.fillStyle = "#CCCC33";
-                        canvas_ctx.fillStyle = "#30eeee";
-                        //canvas_ctx.fillStyle = "#5cb85c";// bootstrap success
-                        //canvas_ctx.fillStyle = "#5bc0de";// boostrap info
-                        //canvas_ctx.fillStyle = "#428bca";// bootstrap primary
-                        //canvas_ctx.fillStyle = "#f9f9f9";// bootstrap default
-                        //canvas_ctx.strokeStyle = "#606090";
-                        //canvas_ctx.strokeStyle = "#5cb85c"; bootstrap success
-                        canvas_ctx.strokeStyle = "#555588";
-                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+                    //New Circle
+                    //canvas_ctx.fillStyle = "#ffff00";
+                    canvas_ctx.fillStyle = "#CCCC33";
+                    canvas_ctx.fillStyle = "#30eeee";
+                    //canvas_ctx.fillStyle = "#5cb85c";// bootstrap success
+                    //canvas_ctx.fillStyle = "#5bc0de";// boostrap info
+                    //canvas_ctx.fillStyle = "#428bca";// bootstrap primary
+                    //canvas_ctx.fillStyle = "#f9f9f9";// bootstrap default
+                    //canvas_ctx.strokeStyle = "#606090";
+                    //canvas_ctx.strokeStyle = "#5cb85c"; bootstrap success
+                    canvas_ctx.strokeStyle = "#555588";
+                    canvas_ctx.fillRect(0,0,tile_size,tile_size);
 
-                        canvas_ctx.beginPath();
-                        canvas_ctx.arc(tile_size/2,tile_size/2,tile_size/2 - padding,0,2*Math.PI);
-                        canvas_ctx.stroke();
+                    canvas_ctx.beginPath();
+                    canvas_ctx.arc(tile_size/2,tile_size/2,tile_size/2 - padding,0,2*Math.PI);
+                    canvas_ctx.stroke();
 
-                        Tile.NEWCIRCLE = new Image();
-                        Tile.NEWCIRCLE.src = canvas_element.toDataURL();
+                    Tile.NEWCIRCLE = new Image();
+                    Tile.NEWCIRCLE.src = canvas_element.toDataURL();
 
-                        //New EX
-                        canvas_ctx.strokeStyle = "#CC4444";
-                        canvas_ctx.fillRect(0,0,tile_size,tile_size);
+                    //New EX
+                    canvas_ctx.strokeStyle = "#CC4444";
+                    canvas_ctx.fillRect(0,0,tile_size,tile_size);
 
-                        canvas_ctx.beginPath();
-                        canvas_ctx.moveTo(padding,padding);
-                        canvas_ctx.lineTo(tile_size - padding,tile_size - padding);
-                        canvas_ctx.moveTo(tile_size - padding,padding);
-                        canvas_ctx.lineTo(padding,tile_size - padding);
-                        canvas_ctx.stroke();
+                    canvas_ctx.beginPath();
+                    canvas_ctx.moveTo(padding,padding);
+                    canvas_ctx.lineTo(tile_size - padding,tile_size - padding);
+                    canvas_ctx.moveTo(tile_size - padding,padding);
+                    canvas_ctx.lineTo(padding,tile_size - padding);
+                    canvas_ctx.stroke();
 
-                        Tile.NEWEX = new Image();
-                        Tile.NEWEX.src = canvas_element.toDataURL();
+                    Tile.NEWEX = new Image();
+                    Tile.NEWEX.src = canvas_element.toDataURL();
 
-                        tile = Tile.NEWEX;
+                    tile = Tile.NEWEX;
 
-                    }
-                    this.update = function() {
-                        tile = tile === Tile.NEWEX ? Tile.EX : tile;
-                        tile = tile === Tile.NEWCIRCLE ? Tile.CIRCLE : tile;
-                    }
-
-                    this.change = function(next){
-                        tile = next;
-                    }
-
-                    this.draw = function(ctx) {
-                        ctx.drawImage(tile, x, y);
-                    }
-
-                    this.hasData = function(){
-                        return tile !== Tile.EMPTY;
-                    }
                 }
+                this.update = function() {
+                    tile = tile === Tile.NEWEX ? Tile.EX : tile;
+                    tile = tile === Tile.NEWCIRCLE ? Tile.CIRCLE : tile;
+                }
+
+                this.change = function(next){
+                    tile = next;
+                }
+
+                this.draw = function(ctx) {
+                    ctx.drawImage(tile, x, y);
+                }
+
+                this.hasData = function(){
+                    return tile !== Tile.EMPTY;
+                }
+            }
+            function mouseDown(evt) {
+                var el = evt.target;
+
+                canvas_width = $("#board").get(0).scrollWidth;
+                canvas_height = $("#board").get(0).scrollHeight;
+                console.log("canvas dimensions",canvas_width,canvas_height);
+                tile_size = Math.round(Math.min( canvas_width/ 3.0 ,  canvas_height / 3.0))
+
+                //pad_left =Math.round((canvas_width - tile_size * 9.0) / 2.);
+                //pad_top = Math.round((canvas_height - tile_size * 7.75) / 2.);
+
+                padding = Math.round(tile_size / 4.0);
+                var px = evt.clientX - el.offsetLeft;// - pad_left;
+                var py = evt.clientY - el.offsetTop;// - pad_top;
+
+                console.log(px,py)
+
+                if (px % (tile_size+padding) >= padding && py >=padding && py <= canvas_width-2*padding && (move_type == "human") && !over() && over_checked) {
+                    var idx = Math.floor(px / (padding+tile_size));
+                    console.log(idx);
+                    idx = moveFromCol(idx+42);                   
+
+                    console.log(idx);
+                    update();
+                    data[idx].change(player);
+                    over_checked = false;
+                    board[idx] = cplayer;
+                    cplayer = -1 * cplayer;
+                    player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
+                    if (cplayer == 1){
+                        move_type = types[0];
+                    }
+                    else{
+                        move_type = types[1];
+                    }
+                    $.post("ttt",{
+                        player : cplayer.toString(),
+                        board : board.toString(),
+                        depths : depths.toString(),
+                        types : types.toString(),
+                        evals : evals.toString()},
+                           function(convo){
+                        finished = convo.finished;
+                        over_checked = true;
+
+                        var iframe = document.createElement("iframe");  //what does this even do?
+                        window.addEventListener("load",function(){
+                            iframe.style.display = "none";
+                            document.body.appendChild(iframe);});
+
+
+                        //$.post(URL,data,callback);   //syntax for ajax post
+
+                        //sendData(idx);
+                    })
+                    render();
+                }
+
+                return
+
         </script>
 
     </head>

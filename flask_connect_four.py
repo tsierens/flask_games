@@ -71,15 +71,6 @@ def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf
     options = cccc.available_moves(board) # get legal moves
     random.shuffle(options) # should inherit move order instead of randomizing
 
-
-    
-#     if len(options) == 1:
-#         update_move(board,options[0])
-#         if cccc.winner(dummy_board):
-#             return (inf,options[0])
-#         else:
-#             return (0,options[0])   
-    
     best_value = (-inf,-inf)
     
     if not options:

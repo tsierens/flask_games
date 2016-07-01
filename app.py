@@ -10,7 +10,7 @@ import connect_four as cccc
 import os
 from flask import Flask, render_template, request, redirect,jsonify
 import flask_connect_four as fc4
-import flask_tic_tac_toe as ft3
+#import flask_tic_tac_toe as ft3
 import json
 
 app = Flask(__name__,)
@@ -65,7 +65,7 @@ def go():
         print game
         if game == 'ttt':
             print 'calling tic tac toe initialization'
-            return ft3.play(p1=p1,p2=p2,depths = (p1depth,p2depth),evals = (p1eval,p2eval))
+            return ft3.play(types =(p1,p2),depths = (p1depth,p2depth),evals = (p1eval,p2eval))
         if game == 'c4':
             print 'calling connect four initialization'
             return fc4.play(types =(p1,p2),depths = (p1depth,p2depth),evals = (p1eval,p2eval))
@@ -142,6 +142,18 @@ def play_cccc():
     types = map(lambda x: x.replace("\"",""),types.split(","))
     evals = request.form.get("evals").split(",")
     print "the eval method is ",evals[player_index_dict[player]]
+    try:
+        print request.form.get("overcheck")
+        overcheck = request.form.get("overcheck")=="true"
+        
+        print overcheck
+        if overcheck:
+            finished = cccc.winner(board.reshape((6,7)))
+            winners = map(list,zip(*fc4.winning_squares(board)))
+            print winners
+            return jsonify(finished = finished, y=winners[0],x=winners[1])
+    except:
+        print "failed"
     if fc4.game_over(np.copy(board).reshape((6,7))):
         finished = cccc.winner(board.reshape((6,7)))
         winners = map(list,zip(*fc4.winning_squares(board)))
@@ -172,11 +184,13 @@ def play_cccc():
 #    print 'next move is', move
     if fc4.game_over(np.copy(board).reshape((6,7))):
         finished = cccc.winner(board.reshape((6,7)))
-        winners = fc4.winning_squares(board)
+        winners = map(list,zip(*fc4.winning_squares(board)))
+        print winners
+        return jsonify(move=move, player = -1*player, finished = finished, y=winners[0],x=winners[1])
     else:
         finished = -2
         winners = []
-    return jsonify(move=move, player = -1*player, finished = finished, winners = winners)
+        return jsonify(move=move, player = -1*player, finished = finished)
 
        
     
