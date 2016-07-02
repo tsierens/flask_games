@@ -10,7 +10,7 @@ import connect_four as cccc
 import os
 from flask import Flask, render_template, request, redirect,jsonify
 import flask_connect_four as fc4
-#import flask_tic_tac_toe as ft3
+import flask_tic_tac_toe as ft3
 import json
 
 app = Flask(__name__,)
@@ -91,37 +91,53 @@ def bio():
     
 @app.route('/ttt',methods = ['POST'])
 def play_ttt():
-    player_index_dict = {-1:1,1:0}
+    player_to_index = {-1:1,1:0}
     player = int(request.form.get("player"))
-    depth = int(request.form.get("depth"))
-    board = request.form.get("board")
-    board = board.split(",")
-#    print board
-    board = [int(x) for x in board]
-    board = np.array(board)
-    types = str(request.form.get("types"))
-    types = types.split(",")
-
-    print "The contorl methods are" , types
-#    print types, board, player, ttt.game_over(np.copy(board))
-    print "the board is ", board
-    print "the current player is ", player
-    if  types[player_index_dict[player]] == 'remote' and not ttt.game_over(np.copy(board)):
-        move = ft3.alpha_beta_move(board, -1, depth = depth)[1]
-        print "the move is ",move
-        board[move-1] = player
-        print "the new board is ", board
-        player *= -1
-    if ttt.game_over(np.copy(board)):
-        if ttt.winner(board)==1:
-            return render_template('tic_tac_toe.html', board = list(board), player = player, types = types,depth = depth, finished = 1)
-        if ttt.winner(board) ==0:
-            return render_template('tic_tac_toe.html', board = list(board), player = player, types = types,depth = depth, finished = 0)
-        if ttt.winner(board) == -1:
-            return render_template('tic_tac_toe.html', board = list(board), player = player, types = types,depth = depth, finished = -1)
+    depths = map(int,request.form.get("depths").split(','))
+    board = np.array([int(x) for x in request.form.get("board").split(',')]).reshape(9)
+    types = map(lambda x: x.replace("\"",""), request.form.get("types").split(","))
+    evals = request.form.get("evals").split(",")
+    overcheck = request.form.get("overcheck") == "true"
+    
+    if overcheck:
+        if ttt.game_over(board):
+            finished = ttt.winner(board.reshape(9))
+        else:
+            finished = -2
+        winners = map(list,zip(*ft3.winning_squares(board)))
+        if not winners:
+            winners = [[],[]]
+        print winners
+        return jsonify(finished = finished, y=winners[0],x=winners[1])
+    
+    if evals[player_to_index[player]] == 'nn':
+        evaluation = lambda x : 0
+        #evaluation = ft3.net_value
     else:
-        print 'render next move'
-        return render_template('tic_tac_toe.html',board = list(board), player = player, types = types,depth = depth, finished = -2)
+        evaluation = lambda x: 0
+    if  types[player_to_index[player]] == 'remote' and not ft3.game_over(np.copy(board)):
+        move = ft3.alpha_beta_move(board.reshape(9),
+                                   player,
+                                   depth = depths[player_to_index[player]],
+                                   evaluation = evaluation)[1]
+        
+        ft3.update_move(board,move,player)
+        print "the board is "
+        print board.reshape((3,3))
+        player *= -1
+        
+    if ft3.game_over(np.copy(board)):
+        finished = ttt.winner(board)
+        winners = map(list,zip(*ft3.winning_squares(board)))
+        if not winners:
+            winners = [[],[]]
+        print winners
+        return jsonify(move=move, player = -1*player, finished = finished, y=winners[0],x=winners[1])
+    else:
+        finished = -2
+        winners = []
+        return jsonify(move=move, player = -1*player, finished = finished)
+    
     
 @app.route('/cccc',methods = ['POST'])
 def play_cccc():
@@ -148,8 +164,13 @@ def play_cccc():
         
         print overcheck
         if overcheck:
-            finished = cccc.winner(board.reshape((6,7)))
+            if cccc.game_over(board):
+                finished = cccc.winner(board.reshape((6,7)))
+            else:
+                finished = -2
             winners = map(list,zip(*fc4.winning_squares(board)))
+            if not winners:
+                winners = [[],[]]
             print winners
             return jsonify(finished = finished, y=winners[0],x=winners[1])
     except:
@@ -157,6 +178,8 @@ def play_cccc():
     if fc4.game_over(np.copy(board).reshape((6,7))):
         finished = cccc.winner(board.reshape((6,7)))
         winners = map(list,zip(*fc4.winning_squares(board)))
+        if not winners:
+            winners = [[],[]]
         print winners
         return jsonify(finished = finished, y=winners[0],x=winners[1])
     else:
@@ -185,6 +208,8 @@ def play_cccc():
     if fc4.game_over(np.copy(board).reshape((6,7))):
         finished = cccc.winner(board.reshape((6,7)))
         winners = map(list,zip(*fc4.winning_squares(board)))
+        if not winners:
+            winners = [[],[]]
         print winners
         return jsonify(move=move, player = -1*player, finished = finished, y=winners[0],x=winners[1])
     else:

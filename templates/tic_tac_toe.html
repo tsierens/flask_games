@@ -23,20 +23,43 @@
                 text-align:center;
             }
             canvas {
-                position: absolute;
+                position: relative;
                 margin: auto;
                 top:0;
                 bottom:0;
                 left:0;
                 right:0;
+                width:100%;
+                height:100%;
             }
 
 
         </style>
-        <div align = "center">
-            <h1> Tic Tac Toe</h1>
 
 
+        <div class = "container">
+
+            <div class="row">
+                <div class = "col-sm-2"></div>
+                <div class = "col-sm-3">
+                    <button onclick= "location.href = '/';" class="btn btn-lg btn-block btn-info">Menu</button>
+                </div>
+                <div class = "col-sm-2"></div>
+                <div class = "col-sm-3">
+                    <form method = "post" action = "index">
+                        <input type="hidden" name="game"  />
+                        <input type="hidden" name="p1type" />
+                        <input type="hidden" name="p2type"/>
+                        <input type="hidden" name="p1depth" />
+                        <input type="hidden" name="p2depth"/>
+                        <input type="hidden" name="p1eval" />
+                        <input type="hidden" name="p2eval" />
+                        <button  value="Submit" class="btn btn-lg btn-block btn-success" onclick = "playAgain();"> Play Again</button>
+                    </form>
+                </div>
+
+                <div class = "col-sm-2"></div>
+            </div>
         </div>
 
         <!-- <a href="http://jquery.com/">jQuery</a>-->
@@ -55,6 +78,14 @@
             var types = {{types | safe}};
             var finished= {{finished|safe}};
             var display_message = false;
+            var data;
+            var tile_size;
+            var padding;
+            var pad_top;
+            var pad_left;
+            var player = Tile.EMPTY;
+            var remote_move = false;
+            var message_sent = false;
 
             window.onload = function main() {
                 var canvas_div = document.getElementById("canvas_div");  //what does this even do
@@ -65,17 +96,39 @@
                 var canvas_height = $("#board").get(0).height;
                 console.log(canvas_width,canvas_height);
 
-                canvas_width = 700;
+                canvas_width = 600;
                 canvas_height = 600;
                 $("#board").get(0).width = canvas_width;
                 $("#board").get(0).height = canvas_height;
 
-                var tile_size = Math.round(Math.min( canvas_width/ 3.75 ,  canvas_height / 3.75))
+                tile_size = Math.round(Math.min( canvas_width/ 4.0 ,  canvas_height / 4.0))
+                console.log("tile size" , tile_size)
+                padding = tile_size / 4.0
+                pad_left =Math.round((canvas_width - tile_size * 4.0) / 2.);
+                pad_top = Math.round((canvas_height - tile_size * 4.0) / 2.);
 
-                var padding = tile_size / 4.0
-                }
+
+                console.log("tile size", tile_size)
+                console.log("padding", tile_size)
+                console.log("pad left", tile_size)
+                console.log("pad top", tile_size)
+                $("#board")[0].addEventListener("mousedown", mouseDown);
+                init();
+
+                tick();
+            }
+
+            function tick(){
+                window.requestAnimationFrame(tick);
+                render();
+            }
 
             function init(){
+
+                console.log("tile size init", tile_size)
+                console.log("padding init", tile_size)
+                console.log("pad left init", tile_size)
+                console.log("pad top init", tile_size)
                 if (data == null) {
                     data =[];
 
@@ -85,33 +138,39 @@
                         data.push(new Tile(x,y));
                     }
                 }
-
                 //$(".board_container").resizable();
                 for (var i = board.length; i--;) {
                     if (board[i] == 1){
-                        marker = Tile.EX;
+                        var marker = Tile.EX;
                     }
                     if (board[i] == 0){
-                        marker = Tile.EMPTY;
+                        var marker = Tile.EMPTY;
                     }
                     if (board[i] == -1){
-                        marker = Tile.CIRCLE;
+                        var marker = Tile.CIRCLE;
                     }
                     data[i].change(marker);
                 }
                 if (cplayer == 1){
-                    var player = Tile.NEWEX;
+                    player = Tile.NEWEX;
                 }
 
                 if (cplayer == -1){
-                    var player = Tile.NEWCIRCLE;
+                    player = Tile.NEWCIRCLE;
                 }
+                move_type = cplayer == 1 ? types[0]:types[1];
+                console.log(move_type)
+                remote_move = move_type == "remote"
 
-                render();
+                if (move_type == "remote" &&!over()){
+                    remoteMove()}
+                else{
+                    render();}   
             }
 
 
             function over(){
+
                 return finished == 1 || finished == 0 || finished == -1;
             }
 
@@ -121,7 +180,42 @@
                     data[i].update();
                 }
             }
+            function remoteMove(){
+                console.log(move_type, !over(), over_checked, remote_move)
+                if (move_type == "remote" && !over() && over_checked && remote_move){
+                    console.log('hello')
+                    remote_move == false;
+                    $.post("ttt",{
+                        overcheck : "false",
+                        player : cplayer.toString(),
+                        board : board.toString(),
+                        depths : depths.toString(),
+                        types : types.toString(),
+                        evals : evals.toString()},
+                           function(convo){
+                        finished = convo.finished;
+                        over_checked = true;
+                        var move = convo.move;
+                        var rplayer = convo.player;
+                        if (rplayer == cplayer) {
 
+                            update();
+                            idx = move;
+                            data[idx].change(player);
+                            board[idx]=cplayer;
+                            cplayer = -1*cplayer;
+                            move_type = cplayer == 1 ? types[0]:types[1];
+                            player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
+                            remote_move = move_type == "remote";
+                            console.log(remote_move)
+                            if (move_type == "remote" &&!over()){
+                                remoteMove()}
+                            else{
+                                render();}
+                        }
+                    });
+                }
+            }
 
             function render() {
 
@@ -137,44 +231,61 @@
                                            "margin-left" : ($(document.body).width()- set_width)/2,
                                            "height" :  set_width});
 
-
+                //console.log("width", set_width);
                 for (var i = data.length; i--;) {
                     data[i].draw(ctx);}
-                move_type = cplayer == 1 ? types[0]:types[1];
-                if (move_type == "remote" && !over() %% over_checked && post_requested == false){
-                    post_requested == true;
 
-                    $.post("cccc",{
+                if (over() && !message_sent){
+                    update();
+                    message_sent = true;
+                    console.log("begin end")
+                    $.post("ttt",{
+                        overcheck : "true",
                         player : cplayer.toString(),
                         board : board.toString(),
                         depths : depths.toString(),
                         types : types.toString(),
                         evals : evals.toString()},
                            function(convo){
+                        var winX = convo.x;
+                        var winY = convo.y;
                         finished = convo.finished;
-                        over_checked = true;
-                        var move = convo.move;
-                        var rplayer = convo.player;
+
+                        if (finished ==1){
+                            var win_tile = Tile.NEWEX;
+                            message = "Player 1 is the winner!"}
+                        if (finished == 0){
+                            var win_tile = Tile.EMPTY;
+                            message = "It's a tie!"}
+                        if (finished == -1){
+                            var win_tile = Tile.NEWCIRCLE;
+                            message = "Player 2 is the winner!"
+                        }
+                        //window.alert(message);
+
+                        var message_type = document.createElement("h1");
+                        message_type.style.textAlign = "center";
+                        var message_body = document.createTextNode(message);
+                        message_type.appendChild(message_body);
+                        document.getElementById('winner').appendChild(message_type);
 
 
-                        update();
-                        idx = move;
-                        data[idx].change(player);
-                        board[idx]=cplayer;
-                        cplayer = -1*cplayer;
+                        for (var i=0; i < winX.length;i++){
+                            console.log(winX[i]+3*winY[i]);
+                            data[winX[i] + 3 * winY[i]].change(win_tile);
+                        }
 
-                        move_type = cplayer == 1 ? types[0]:types[1];
-
-                        player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
-                        post_requested == false;
-                        render();
+                        for (var i = data.length; i--;) {
+                            data[i].draw(ctx);}
                     });
-
 
 
                 }
 
+
             }
+
+
 
             function Tile(x,y) {
 
@@ -287,7 +398,7 @@
                 canvas_width = $("#board").get(0).scrollWidth;
                 canvas_height = $("#board").get(0).scrollHeight;
                 console.log("canvas dimensions",canvas_width,canvas_height);
-                tile_size = Math.round(Math.min( canvas_width/ 3.0 ,  canvas_height / 3.0))
+                tile_size = Math.round(Math.min( canvas_width/ 4.0 ,  canvas_height / 4.0))
 
                 //pad_left =Math.round((canvas_width - tile_size * 9.0) / 2.);
                 //pad_top = Math.round((canvas_height - tile_size * 7.75) / 2.);
@@ -296,62 +407,82 @@
                 var px = evt.clientX - el.offsetLeft;// - pad_left;
                 var py = evt.clientY - el.offsetTop;// - pad_top;
 
+
+
                 console.log(px,py)
 
-                if (px % (tile_size+padding) >= padding && py >=padding && py <= canvas_width-2*padding && (move_type == "human") && !over() && over_checked) {
-                    var idx = Math.floor(px / (padding+tile_size));
-                    console.log(idx);
-                    idx = moveFromCol(idx+42);                   
-
+                if (px % (tile_size+padding) >= padding && py % (tile_size+padding) >=padding && py <= canvas_width-2*padding && (move_type == "human") && !over() && over_checked) {
+                    var idx = Math.floor(px / (padding+tile_size)) + 3 * Math.floor(py / (padding+tile_size)) ;
                     console.log(idx);
                     update();
-                    data[idx].change(player);
-                    over_checked = false;
-                    board[idx] = cplayer;
-                    cplayer = -1 * cplayer;
-                    player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
-                    if (cplayer == 1){
-                        move_type = types[0];
+                    if (!data[idx].hasData()){
+                        data[idx].change(player);
+                        over_checked = false;
+                        board[idx] = cplayer;
+                        cplayer = -1 * cplayer;
+                        player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
+                        move_type = cplayer == 1 ? types[0] : types[1];
+                        remote_move = move_type == "remote"
+
+                        $.post("ttt",{
+                            overcheck : "true",
+                            player : cplayer.toString(),
+                            board : board.toString(),
+                            depths : depths.toString(),
+                            types : types.toString(),
+                            evals : evals.toString()},
+                               function(convo){
+                            finished = convo.finished;
+                            over_checked = true;
+
+                            var iframe = document.createElement("iframe");  //what does this even do?
+                            window.addEventListener("load",function(){
+                                iframe.style.display = "none";
+                                document.body.appendChild(iframe);});
+
+
+                            //$.post(URL,data,callback);   //syntax for ajax post
+
+                            //sendData(idx);
+                            console.log(move_type, !over())
+                            if (move_type == "remote" && !over()){
+                                remoteMove()}
+                            else{
+                                render();}
+
+                        })
                     }
-                    else{
-                        move_type = types[1];
-                    }
-                    $.post("ttt",{
-                        player : cplayer.toString(),
-                        board : board.toString(),
-                        depths : depths.toString(),
-                        types : types.toString(),
-                        evals : evals.toString()},
-                           function(convo){
-                        finished = convo.finished;
-                        over_checked = true;
-
-                        var iframe = document.createElement("iframe");  //what does this even do?
-                        window.addEventListener("load",function(){
-                            iframe.style.display = "none";
-                            document.body.appendChild(iframe);});
-
-
-                        //$.post(URL,data,callback);   //syntax for ajax post
-
-                        //sendData(idx);
-                    })
-                    render();
                 }
 
                 return
+            }
 
+            function giveElementValue(name, set){
+                document.getElementsByName(name)[0].value = set;
+            }
+            function playAgain(){
+                giveElementValue("game", "ttt");
+                giveElementValue("p1type", types[0]);
+                giveElementValue("p2type", types[1]);
+                giveElementValue("p1depth", depths[0].toString());
+                giveElementValue("p2depth", depths[1].toString());
+                giveElementValue("p1eval", evals[0].toString());
+                giveElementValue("p2eval", evals[1].toString());
+            }
         </script>
 
     </head>
 
 
     <body>
-        <div align = "center">
-            <div align = "center">
-                <button onclick="location.href = '/';"> Reset </button>
+
+        <div class = "centered">
+            <div class = "board_container centered ui-widget-content" id = "canvas_div">
             </div>
+            <div id = "winner"></div>
+
         </div>
+
     </body>
 </html>
 <!--

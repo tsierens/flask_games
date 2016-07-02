@@ -15,11 +15,37 @@ class alpha_beta:
     def make_move(self,board,active_turn):
         #print (board,active_turn,self.depth)
         return alpha_beta_move(board,active_turn,self.depth)[1]
+inf = float("inf")
+
+def winning_squares(board):
+    board = board.reshape((3,3))
+    winners = set()
+    for i in range(3):
+        if abs(sum(board[i,:])) == 3:
+            winners.update((i,j) for j in range(3))
+        if abs(sum(board[:,i])) == 3:
+            winners.update((j,i) for j in range(3))
+    if abs(sum(np.diag(board))) == 3:
+        winners.update((i,i) for i in range(3))
+    if abs(sum(np.diag(np.fliplr(board)))) == 3:
+        winners.update((i,2-i) for i in range(3))
+    return winners
+    
+
+def update_move(board, move, turn):
+    board[move] = turn
+    return None
+
+def unupdate_move(board, move):
+    board[move] = 0
+    return None
+    
+    
 def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf), evaluation = lambda x: 0):
     dummy_board = np.copy(board).reshape(9) # we don't want to change the board state
 
     swap_player = {1:-1,-1:1} # So we can change whose turn
-    options = cccc.available_moves(board) # get legal moves
+    options = ttt.available_moves(board) # get legal moves
     random.shuffle(options) # should inherit move order instead of randomizing
 
     best_value = (-inf,-inf)
@@ -30,7 +56,7 @@ def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf
     cand_move = options[0]
     if depth == 0: 
         for x in options:
-            dummy_board[x] = turn
+            update_move(dummy_board,x,turn)
             op_value = (evaluation(dummy_board*swap_player[turn]) , depth)
 
             if tuple(-1 * el for el in op_value) > best_value:
@@ -45,10 +71,10 @@ def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf
 
             update_move(dummy_board,x,turn)
         
-            if cccc.winner(dummy_board): #should check over and tied too
+            if ttt.winner(dummy_board): #should check over and tied too
                 return((inf,depth), x)
             
-            if cccc.is_full(dummy_board): #This assumes you can't lose on your turn
+            if ttt.is_full(dummy_board): #This assumes you can't lose on your turn
                 return((0,depth) , x)
             
             op_value,_ = alpha_beta_move( dummy_board,
@@ -70,27 +96,14 @@ def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf
     #        dummy_board[height, x] = 0
     return (best_value, cand_move)
 
-def play(p1='human',p2='remote',depth=0,heir=None):
-    board = np.zeros(9)
-    player = 1
-    player_type = {1:'human',-1:'human'}
-    print 'playing tic tac toe'
-    if p1 == "human":
-        player1 = ttt.player()
-        player_type[1] = 'human'
-    else:
-        player1 = alpha_beta(depth)
-        player_type[1] = 'remote'
-    if p2 == "human":
-        player2 = ttt.player()
-        player_type[-1] =  'human'
-    else:
-        player2 = alpha_beta(depth)
-        player_type[-1] = 'remote'
-    print 'starting a game of tic tac toe'
-    print [player_type[1], player_type[-1]]
-    return render_template('tic_tac_toe.html',board = list(board),
-                                   player =player, types = [player_type[1],player_type[-1]], depth = depth,finished = -2)
-    
-    
+def play(types=['human','human'],depths=(0,0),evals = ("random","random")):
+    print 'starting a game of connect Four'
+    return render_template('tic_tac_toe.html',
+                           board = list(np.zeros(9)),
+                           player = 1, 
+                           finished = -2,
+                           types = map(str,types),
+                           depths = list(depths),
+                           evals = map(str,evals))
+                           
     

@@ -142,11 +142,6 @@
                 $("#board").get(0).width = canvas_width;
                 $("#board").get(0).height = canvas_height;
 
-
-
-
-
-
                 tile_size = Math.round(Math.min( canvas_width/ 9.0 ,  canvas_height / 7.75))
 
                 pad_left =Math.round((canvas_width - tile_size * 9.0) / 2.);
@@ -248,7 +243,9 @@
                            function(convo){
                         var winX = convo.x;
                         var winY = convo.y;
+                        console.log(convo.finished);
                         console.log(winX,winY);
+                        
                         finished = convo.finished;
 
                         if (finished ==1){
@@ -320,13 +317,7 @@
                             over
                             board[idx]=cplayer;
                             cplayer = -1*cplayer;
-
-                            if (cplayer == 1){
-                                move_type = types[0];
-                            }
-                            else{
-                                move_type = types[1];
-                            }
+                            move_type = cplayer == 1 ? types[0]: types[1];
                             if (move_type == "remote" &&  !over()){
                                 messageReceived = false}
                             player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
@@ -516,7 +507,7 @@
                 padding = Math.round(tile_size / 4.0);
                 var px = evt.clientX - el.offsetLeft;// - pad_left;
                 var py = evt.clientY - el.offsetTop;// - pad_top;
-
+                
                 console.log(px,py)
 
                 if (px % (tile_size+padding) >= padding && py >=padding && py <= canvas_width-2*padding && (move_type == "human") && !over() && over_check) {
@@ -531,12 +522,8 @@
                     board[idx] = cplayer;
                     cplayer = -1 * cplayer;
                     player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
-                    if (cplayer == 1){
-                        move_type = types[0];
-                    }
-                    else{
-                        move_type = types[1];
-                    }
+                    move_type = cplayer == 1 ? types[0]: types[1];
+           
 
 
 
