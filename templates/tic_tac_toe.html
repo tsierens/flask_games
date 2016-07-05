@@ -84,7 +84,7 @@
             var pad_top;
             var pad_left;
             var player = Tile.EMPTY;
-            var remote_move = false;
+            //var remote_move = false;
             var message_sent = false;
 
             window.onload = function main() {
@@ -151,13 +151,7 @@
                     }
                     data[i].change(marker);
                 }
-                if (cplayer == 1){
-                    player = Tile.NEWEX;
-                }
-
-                if (cplayer == -1){
-                    player = Tile.NEWCIRCLE;
-                }
+                player = cplayer == 1 ? Tile.NEWEX : Tile.NEWCIRCLE;
                 move_type = cplayer == 1 ? types[0]:types[1];
                 console.log(move_type)
                 remote_move = move_type == "remote"
@@ -172,7 +166,6 @@
 
 
             function over(){
-
                 return finished == 1 || finished == 0 || finished == -1;
             }
 
@@ -184,49 +177,40 @@
             }
             function remoteMove(){
                 console.log(move_type, !over(), over_checked, remote_move)
-                if (move_type == "remote" && !over() && over_checked && remote_move){
-                    console.log('hello')
-                    remote_move == false;
-                    $.post("ttt",{
-                        overcheck : "false",
-                        player : cplayer.toString(),
-                        board : board.toString(),
-                        depths : depths.toString(),
-                        types : types.toString(),
-                        evals : evals.toString()},
-                           function(convo){
-                        finished = convo.finished;
-                        over_checked = true;
-                        var move = convo.move;
-                        var rplayer = convo.player;
-                        if (rplayer == cplayer) {
+                console.log('hello')
+                //remote_move == false;
+                $.post("ttt",{
+                    overcheck : "false",
+                    player : cplayer.toString(),
+                    board : board.toString(),
+                    depths : depths.toString(),
+                    types : types.toString(),
+                    evals : evals.toString()},
+                       function(convo){
+                    finished = convo.finished;
+                    over_checked = true;
+                    var move = convo.move;
+                    var rplayer = convo.player;
 
-                            update();
-                            idx = move;
-                            
-                            board[idx]=cplayer;
-                            cplayer = -1*cplayer;
-                            move_type = cplayer == 1 ? types[0]:types[1];
-                            if (over()){
-                                update();
-                                data[idx].change(player);
-                                final()}
-                            else{
-                                data[idx].change(player);
-                                player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
-                                remote_move = move_type == "remote";
-                                console.log(remote_move)
+                    update();
+                    idx = move;
+                    board[idx]=cplayer;
+                    cplayer = -1*cplayer;
+                    data[idx].change(player);
+                    player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
+                    move_type = cplayer == 1 ? types[0]:types[1];
+                    if (over()){
+                        final()}
+                    else{
+                        remote_move = move_type == "remote";
+                        console.log(remote_move)
+                        if (move_type == "remote" &&!over()){
+                            remoteMove()}
+                    }
+                    //else{
+                    //  render();}
 
-
-
-                                if (move_type == "remote" &&!over()){
-                                    remoteMove()}
-                            }
-                            //else{
-                            //  render();}
-                        }
-                    });
-                }
+                });
             }
 
             function draw() {
@@ -279,8 +263,8 @@
                     var message_body = document.createTextNode(message);
                     message_type.appendChild(message_body);
                     document.getElementById('winner').appendChild(message_type);
-
-                    update();
+                    if (finished == 1 || finished == -1){
+                        update();}
                     for (var i=0; i < winX.length;i++){
                         console.log(winX[i]+3*winY[i]);
                         data[winX[i] + 3 * winY[i]].change(win_tile);
@@ -435,10 +419,12 @@
 
                         over_checked = false;
                         board[idx] = cplayer;
+                        update();
+                        data[idx].change(player);  
                         cplayer = -1 * cplayer;
-
+                        player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
                         move_type = cplayer == 1 ? types[0] : types[1];
-                        remote_move = move_type == "remote"
+                        //remote_move = move_type == "remote"
 
                         $.post("ttt",{
                             overcheck : "true",
@@ -451,10 +437,10 @@
                             finished = convo.finished;
                             over_checked = true;
 
-                            var iframe = document.createElement("iframe");  //what does this even do?
-                            window.addEventListener("load",function(){
-                                iframe.style.display = "none";
-                                document.body.appendChild(iframe);});
+                            //var iframe = document.createElement("iframe");  //what does this even do?
+                            //window.addEventListener("load",function(){
+                            //    iframe.style.display = "none";
+                            //    document.body.appendChild(iframe);});
 
 
                             //$.post(URL,data,callback);   //syntax for ajax post
@@ -463,15 +449,8 @@
                             console.log(move_type, !over())
 
                             if (over()){
-                                update();
-                                data[idx].change(player);                              
-
                                 final()}
                             else{
-                                update();
-                                data[idx].change(player);
-                                player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
-
                                 if (move_type == "remote" && !over()){
                                     remoteMove()}
                             }
