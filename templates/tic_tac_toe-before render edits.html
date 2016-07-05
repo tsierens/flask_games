@@ -120,7 +120,7 @@
 
             function tick(){
                 window.requestAnimationFrame(tick);
-                draw();
+                render();
             }
 
             function init(){
@@ -162,12 +162,10 @@
                 console.log(move_type)
                 remote_move = move_type == "remote"
 
-                draw();
-
                 if (move_type == "remote" &&!over()){
                     remoteMove()}
-                //   else{
-                //     render();}   
+                else{
+                    render();}   
             }
 
 
@@ -203,33 +201,24 @@
 
                             update();
                             idx = move;
-                            
+                            data[idx].change(player);
                             board[idx]=cplayer;
                             cplayer = -1*cplayer;
                             move_type = cplayer == 1 ? types[0]:types[1];
-                            if (over()){
-                                update();
-                                data[idx].change(player);
-                                final()}
+                            player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
+                            remote_move = move_type == "remote";
+                            console.log(remote_move)
+                            if (move_type == "remote" &&!over()){
+                                remoteMove()}
                             else{
-                                data[idx].change(player);
-                                player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
-                                remote_move = move_type == "remote";
-                                console.log(remote_move)
-
-
-
-                                if (move_type == "remote" &&!over()){
-                                    remoteMove()}
-                            }
-                            //else{
-                            //  render();}
+                                render();}
                         }
                     });
                 }
             }
 
-            function draw() {
+            function render() {
+
 
                 var max_height = $(window).height() * 0.6;
                 var max_width = $(document.body).width() * 0.5;
@@ -245,61 +234,56 @@
                 //console.log("width", set_width);
                 for (var i = data.length; i--;) {
                     data[i].draw(ctx);}
-            }
 
-            function final() {
-                message_sent = true;
-                console.log("begin end")
-                $.post("ttt",{
-                    overcheck : "true",
-                    player : cplayer.toString(),
-                    board : board.toString(),
-                    depths : depths.toString(),
-                    types : types.toString(),
-                    evals : evals.toString()},
-                       function(convo){
-                    var winX = convo.x;
-                    var winY = convo.y;
-                    finished = convo.finished;
-
-                    if (finished ==1){
-                        var win_tile = Tile.NEWEX;
-                        message = "Player 1 is the winner!"}
-                    if (finished == 0){
-                        var win_tile = Tile.EMPTY;
-                        message = "It's a tie!"}
-                    if (finished == -1){
-                        var win_tile = Tile.NEWCIRCLE;
-                        message = "Player 2 is the winner!"
-                    }
-                    //window.alert(message);
-
-                    var message_type = document.createElement("h1");
-                    message_type.style.textAlign = "center";
-                    var message_body = document.createTextNode(message);
-                    message_type.appendChild(message_body);
-                    document.getElementById('winner').appendChild(message_type);
-
+                if (over() && !message_sent){
                     update();
-                    for (var i=0; i < winX.length;i++){
-                        console.log(winX[i]+3*winY[i]);
-                        data[winX[i] + 3 * winY[i]].change(win_tile);
-                    }
+                    message_sent = true;
+                    console.log("begin end")
+                    $.post("ttt",{
+                        overcheck : "true",
+                        player : cplayer.toString(),
+                        board : board.toString(),
+                        depths : depths.toString(),
+                        types : types.toString(),
+                        evals : evals.toString()},
+                           function(convo){
+                        var winX = convo.x;
+                        var winY = convo.y;
+                        finished = convo.finished;
 
-                    draw();
-                });
+                        if (finished ==1){
+                            var win_tile = Tile.NEWEX;
+                            message = "Player 1 is the winner!"}
+                        if (finished == 0){
+                            var win_tile = Tile.EMPTY;
+                            message = "It's a tie!"}
+                        if (finished == -1){
+                            var win_tile = Tile.NEWCIRCLE;
+                            message = "Player 2 is the winner!"
+                        }
+                        //window.alert(message);
+
+                        var message_type = document.createElement("h1");
+                        message_type.style.textAlign = "center";
+                        var message_body = document.createTextNode(message);
+                        message_type.appendChild(message_body);
+                        document.getElementById('winner').appendChild(message_type);
+
+
+                        for (var i=0; i < winX.length;i++){
+                            console.log(winX[i]+3*winY[i]);
+                            data[winX[i] + 3 * winY[i]].change(win_tile);
+                        }
+
+                        for (var i = data.length; i--;) {
+                            data[i].draw(ctx);}
+                    });
+
+
+                }
+
+
             }
-            // function render() {
-
-
-            //    if (over() && !message_sent){
-            //      final()
-
-
-            //  }
-            //  draw();
-
-            //}
 
 
 
@@ -409,7 +393,7 @@
                 }
             }
             function mouseDown(evt) {
-                //var el = evt.target;
+                var el = evt.target;
 
                 canvas_width = $("#board").get(0).scrollWidth;
                 canvas_height = $("#board").get(0).scrollHeight;
@@ -420,9 +404,8 @@
                 //pad_top = Math.round((canvas_height - tile_size * 7.75) / 2.);
 
                 padding = Math.round(tile_size / 4.0);
-                var rect = $("#board").get(0).getBoundingClientRect()
-                var px = evt.clientX - rect.left// - el.offsetLeft;// - pad_left;
-                var py = evt.clientY - rect.top// - el.offsetTop;// - pad_top;
+                var px = evt.clientX - el.offsetLeft;// - pad_left;
+                var py = evt.clientY - el.offsetTop;// - pad_top;
 
 
 
@@ -431,12 +414,13 @@
                 if (px % (tile_size+padding) >= padding && py % (tile_size+padding) >=padding && py <= canvas_width-2*padding && (move_type == "human") && !over() && over_checked) {
                     var idx = Math.floor(px / (padding+tile_size)) + 3 * Math.floor(py / (padding+tile_size)) ;
                     console.log(idx);
+                    update();
                     if (!data[idx].hasData()){
-
+                        data[idx].change(player);
                         over_checked = false;
                         board[idx] = cplayer;
                         cplayer = -1 * cplayer;
-
+                        player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
                         move_type = cplayer == 1 ? types[0] : types[1];
                         remote_move = move_type == "remote"
 
@@ -461,22 +445,10 @@
 
                             //sendData(idx);
                             console.log(move_type, !over())
-
-                            if (over()){
-                                update();
-                                data[idx].change(player);                              
-
-                                final()}
+                            if (move_type == "remote" && !over()){
+                                remoteMove()}
                             else{
-                                update();
-                                data[idx].change(player);
-                                player = player === Tile.NEWCIRCLE ? Tile.NEWEX : Tile.NEWCIRCLE;
-
-                                if (move_type == "remote" && !over()){
-                                    remoteMove()}
-                            }
-                            //else{
-                            //    render();}
+                                render();}
 
                         })
                     }
