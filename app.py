@@ -111,8 +111,8 @@ def play_ttt():
         return jsonify(finished = finished, y=winners[0],x=winners[1])
     
     if evals[player_to_index[player]] == 'nn':
-        evaluation = lambda x : 0
-        #evaluation = ft3.net_value
+        #evaluation = lambda x : 0
+        evaluation = ft3.sym_net_value
     else:
         evaluation = lambda x: 0
     if  types[player_to_index[player]] == 'remote' and not ft3.game_over(np.copy(board)):

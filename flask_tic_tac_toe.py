@@ -6,6 +6,29 @@ import sys
 import tic_tac_toe as ttt
 from flask import Flask, render_template, request, redirect
 import json
+import pickle
+
+with open('t3_net.pkl','rb') as f:
+    value = pickle.load(f)
+
+def net_value(board):
+    t0=time.clock()
+
+    h = board.reshape(9)
+    activations = [np.vectorize(lambda x: max(0.,x))]*(len(value)-1) + [np.tanh]
+    for i,layer in enumerate(value):
+        h = activations[i](np.dot(h,layer[0])+layer[1])
+    return float(h)
+
+def sym_net_value(board):
+    board = board.reshape((3,3))
+    boards = [board,board.transpose()]
+    for i in range(3):
+        dummy_board = np.rot90(board)
+        boards += [board,board.transpose()]
+#    print boards
+    return sum(net_value(b) for b in boards) / 8
+
 
 def game_over(board):
     return ttt.is_full(board) or ttt.winner(board)

@@ -34,7 +34,6 @@
         <script>
 
 
-
             var types = ["p1type","p2type"];
             var p1stuff = ["p1eval","p1depth"];
             var p2stuff = ["p2eval","p2depth"];
@@ -51,8 +50,7 @@
                     }
 
                     for (var j = 0; j < deep_ids[i].length; j++){
-                        if (document.getElementsByName(evals[i])[0].value == 'nn'){
-
+                        if (document.getElementsByName(evals[i])[0].value == 'nn' && document.getElementById('game').value == 'c4'){
                             document.getElementById(deep_ids[i][j]).disabled = true;
                             if (document.getElementsByName(depths[i])[0].value >= 6){
                                 document.getElementById(zero_ids[i]).selected = true;
@@ -143,7 +141,7 @@
                     <div class = "col-md-3 right"><h4>Game:</h4></div>
                     <div class = "col-md-6">
 
-                        <select class="form-control col-md-4" name = "game"> 
+                        <select class="form-control col-md-4" id = 'game' name = "game" onchange = "update_select();"> 
                             <option value = "ttt" >Tic Tac Toe</option>
                             <option value = "c4" selected>Connect Four</option>
                         </select>
