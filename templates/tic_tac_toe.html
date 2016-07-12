@@ -36,33 +36,38 @@
 
         </style>
 
+        <div class="jumbotron">
+            <h1 align = "center">Tic Tac Toe!</h1>
+            <div class = "centered">
+                <div class = "container">
 
-        <div class = "container">
+                    <div class="row">
+                        <div class = "col-sm-2"></div>
+                        <div class = "col-sm-3">
+                            <button onclick= "location.href = '/';" class="btn btn-lg btn-block btn-info">Menu</button>
+                        </div>
+                        <div class = "col-sm-2"></div>
+                        <div class = "col-sm-3">
+                            <form method = "post" action = "index">
+                                <input type="hidden" name="game"  />
+                                <input type="hidden" name="p1type" />
+                                <input type="hidden" name="p2type"/>
+                                <input type="hidden" name="p1depth" />
+                                <input type="hidden" name="p2depth"/>
+                                <input type="hidden" name="p1eval" />
+                                <input type="hidden" name="p2eval" />
+                                <button  value="Submit" class="btn btn-lg btn-block btn-success" onclick = "playAgain();"> Play Again</button>
+                            </form>
+                        </div>
 
-            <div class="row">
-                <div class = "col-sm-2"></div>
-                <div class = "col-sm-3">
-                    <button onclick= "location.href = '/';" class="btn btn-lg btn-block btn-info">Menu</button>
+                        <div class = "col-sm-2"></div>
+                    </div>
+
+
                 </div>
-                <div class = "col-sm-2"></div>
-                <div class = "col-sm-3">
-                    <form method = "post" action = "index">
-                        <input type="hidden" name="game"  />
-                        <input type="hidden" name="p1type" />
-                        <input type="hidden" name="p2type"/>
-                        <input type="hidden" name="p1depth" />
-                        <input type="hidden" name="p2depth"/>
-                        <input type="hidden" name="p1eval" />
-                        <input type="hidden" name="p2eval" />
-                        <button  value="Submit" class="btn btn-lg btn-block btn-success" onclick = "playAgain();"> Play Again</button>
-                    </form>
-                </div>
-
-                <div class = "col-sm-2"></div>
             </div>
-
-
         </div>
+
 
         <!-- <a href="http://jquery.com/">jQuery</a>-->
         <!-- <script src="jquery.js"></script> -->
@@ -258,7 +263,7 @@
                                           "font-family": "courier,fixed"
                                          });
                     setTimeout(typewriter,5000);
-                
+
                 }
                            ,8000);
 
