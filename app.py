@@ -33,7 +33,8 @@ def clear():
 
 @app.route('/c4ee', methods = ['GET'])
 def easter_egg():
-    return fc4.play(types =('human','remote'),depths = (0,4),evals = ('random','nn'))
+    np.random.seed(314159)
+    return fc4.play(types =('remote','remote'),depths = (2,6),evals = ('nn','random'))
 
 @app.route('/index', methods = ['GET','POST'])
 def go():

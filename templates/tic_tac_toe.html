@@ -262,10 +262,10 @@
                                           "color":"#3d1",
                                           "font-family": "courier,fixed"
                                          });
-                    setTimeout(typewriter,5000);
+                    setTimeout(typewriter,2000);
 
                 }
-                           ,8000);
+                           ,5000);
 
                 function typewriter() {
 
@@ -277,10 +277,10 @@
                     var char = text.slice(-1);
                     if( char === '<' ) isTag = true;
                     if( char === '>' ) isTag = false;
-                    if( char === '.' ) {return setTimeout(typewriter,3000)}
+                    if( char === '.' ) {return setTimeout(typewriter,1500)}
 
                     if (isTag) return typewriter();
-                    setTimeout(typewriter, 150);
+                    setTimeout(typewriter, 50);
                 };
             }
 

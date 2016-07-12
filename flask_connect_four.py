@@ -149,7 +149,7 @@ def alpha_beta_move(board, turn, depth = 0, alpha = (-inf,-inf), beta = (inf,inf
     return (best_value, cand_move)
 
 def play(types=['human','human'],depths=(0,0),evals = ("random","random")):
-    print 'starting a game of connect Four'
+    print 'starting a game of connect Four' 
     return render_template('connect_four.html',
                            board = list(np.zeros(42)),
                            player = 1, 

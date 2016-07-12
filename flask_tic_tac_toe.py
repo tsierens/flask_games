@@ -10,6 +10,8 @@ import pickle
 
 with open('t3_net.pkl','rb') as f:
     value = pickle.load(f)
+    
+
 
 def net_value(board):
     t0=time.clock()
