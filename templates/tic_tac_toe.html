@@ -60,6 +60,8 @@
 
                 <div class = "col-sm-2"></div>
             </div>
+
+
         </div>
 
         <!-- <a href="http://jquery.com/">jQuery</a>-->
@@ -86,6 +88,7 @@
             var player = Tile.EMPTY;
             //var remote_move = false;
             var message_sent = false;
+            var prof_message = false;
 
             window.onload = function main() {
                 var canvas_div = document.getElementById("canvas_div");  //what does this even do
@@ -229,6 +232,51 @@
                 //console.log("width", set_width);
                 for (var i = data.length; i--;) {
                     data[i].draw(ctx);}
+
+
+                if (over() && evals[0] == "nn" && evals[1] == "nn" && !prof_message){
+                    console.log('displaying professor message')
+                    prof_message = true
+                    professor()
+
+
+
+                }
+
+            }
+
+            function professor(){
+                var str = "<p><h1> GREETINGS USER.<br><br>A STRANGE GAME.<BR><BR>THE ONLY WINNING MOVE IS <BR>NOT TO PLAY.<BR><BR>HOW ABOUT A NICE GAME OF CONNECT FOUR?</h1></p>",
+                    i = 0,
+                    isTag,
+                    text;
+                setTimeout(function(){ 
+                    $("#typewriter").css({"background" : "#111",
+                                          "width":'825px',
+                                          "height":'310px',
+                                          "color":"#3d1",
+                                          "font-family": "courier,fixed"
+                                         });
+                    setTimeout(typewriter,5000);
+                
+                }
+                           ,8000);
+
+                function typewriter() {
+
+                    text = str.slice(0, ++i);
+                    if (text === str) return;
+
+                    document.getElementById('typewriter').innerHTML = text;
+
+                    var char = text.slice(-1);
+                    if( char === '<' ) isTag = true;
+                    if( char === '>' ) isTag = false;
+                    if( char === '.' ) {return setTimeout(typewriter,3000)}
+
+                    if (isTag) return typewriter();
+                    setTimeout(typewriter, 150);
+                };
             }
 
             function final() {
@@ -263,6 +311,7 @@
                     var message_body = document.createTextNode(message);
                     message_type.appendChild(message_body);
                     document.getElementById('winner').appendChild(message_type);
+
                     if (finished == 1 || finished == -1){
                         update();}
                     for (var i=0; i < winX.length;i++){
@@ -483,12 +532,18 @@
 
     <body>
 
-        <div class = "centered">
+        <div id = "main" class = "centered">
+            <div class="row">
+                <div id = "typewriter" style = "margin-left:2in; text-align:left"></div>
+            </div>
             <div class = "board_container centered ui-widget-content" id = "canvas_div">
             </div>
             <div id = "winner"></div>
 
+
         </div>
+
+
 
     </body>
 </html>
