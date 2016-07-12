@@ -7,6 +7,7 @@ import sys
 import connect_four as cccc
 import os
 import json
+import pickle
 from flask import Flask, render_template, request, redirect, jsonify
 
 app = Flask(__name__)
@@ -14,15 +15,35 @@ app = Flask(__name__)
 app.board = [0]*42
 app.player = 1
 
+#def net_value(board):
+#    t0=time.clock()
+#    (m1,m2,m3,m4) = np.load('TD_cccc_100_1_6million(1).npz')['arr_0']
+#    board = np.copy(board).reshape((1,42))
+#    m5 = np.dot(board, m1) + m2
+#    answer = np.tanh(np.dot(np.tanh(m5), m3) + m4) + random.random()*0.05 - 0.05
+#    print "node evaluation took {:.5}s".format(time.clock()-t0)
+#    return answer
+#    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4) + random.random()*0.1 - 0.05
+
+
+with open('c4_shallow_net.pkl','rb') as f:
+    value = pickle.load(f)
+
 def net_value(board):
     t0=time.clock()
-    (m1,m2,m3,m4) = np.load('TD_cccc_100_1_6million(1).npz')['arr_0']
-    board = np.copy(board).reshape((1,42))
-    m5 = np.dot(board, m1) + m2
-    answer = np.tanh(np.dot(np.tanh(m5), m3) + m4) + random.random()*0.05 - 0.05
-#    print "node evaluation took {:.5}s".format(time.clock()-t0)
-    return answer
-#    return np.tanh(np.dot(np.vectorize(np.tanh)(m5), m3) + m4) + random.random()*0.1 - 0.05
+    
+    h = board.reshape(np.prod(board.shape))
+    activations = [np.vectorize(lambda x: max(0.,x))]*(len(value)-1) + [np.tanh]
+    for i,layer in enumerate(value):
+        h = activations[i](np.dot(h,layer[0])+layer[1])
+    return float(h)
+
+def sym_net_value(board):
+    size = np.prod(board.shape)
+    board = board.reshape((size/42,6,7))
+    mboard = board[:,:,::-1]
+    return (net_value(board) + net_value(mboard))*0.5 + np.random.random()*0.1-0.05
+
 
 def game_over(board):
     board = np.array(board).reshape((6,7))

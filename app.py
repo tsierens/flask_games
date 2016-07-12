@@ -186,7 +186,7 @@ def play_cccc():
         winners = []
         finished = -2
     if evals[player_index_dict[player]] == 'nn':
-        evaluation = fc4.net_value
+        evaluation = fc4.sym_net_value
     else:
         evaluation = lambda x: 0
     #evaluation
