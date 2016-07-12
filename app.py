@@ -31,7 +31,10 @@ def clear():
     return redirect('/index')
     #return render_template('index.html',op = app.OPTIONS, names = app.NAMES)
 
-        
+@app.route('/c4ee', methods = ['GET'])
+def easter_egg():
+    return fc4.play(types =('human','remote'),depths = (0,4),evals = ('random','nn'))
+
 @app.route('/index', methods = ['GET','POST'])
 def go():
     print 'HELLO!'

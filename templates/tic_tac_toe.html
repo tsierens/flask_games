@@ -251,7 +251,7 @@
             }
 
             function professor(){
-                var str = "<p><h1> GREETINGS USER.<br><br>A STRANGE GAME.<BR><BR>THE ONLY WINNING MOVE IS <BR>NOT TO PLAY.<BR><BR>HOW ABOUT A NICE GAME OF CONNECT FOUR?</h1></p>",
+                var str = "<p><h1> GREETINGS USER.<br><br>A STRANGE GAME.<BR><BR>THE ONLY WINNING MOVE IS <BR>NOT TO PLAY.<BR><BR>HOW ABOUT A NICE GAME OF <a href='c4ee'>CONNECT FOUR</a>?</h1></p>",
                     i = 0,
                     isTag,
                     text;
@@ -283,6 +283,22 @@
                     setTimeout(typewriter, 150);
                 };
             }
+
+            function connectfour(){
+                $.post("index",{
+                    game : 'c4',
+                    p1type: 'human',
+                    p2type: 'remote',
+                    p1depth: 0,
+                    p2depth: 4,
+                    p1eval: 'random',
+                    p2eval: 'nn'
+                },
+                                       function (data){document.write(data)
+
+                                      });
+            }
+
 
             function final() {
                 message_sent = true;
